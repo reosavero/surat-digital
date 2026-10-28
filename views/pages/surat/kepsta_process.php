@@ -639,6 +639,20 @@ $kepstaNipDisplay = !empty($kepstaNipRaw) ? (str_starts_with(strtoupper(trim($ke
         'File'
     ];
     $isFromUploadLampiran = !empty($meta['from_upload_lampiran']);
+
+    $pdfLampirans = [];
+    if (!empty($meta['lampiran_pdf_paths'])) {
+        if (is_array($meta['lampiran_pdf_paths'])) {
+            $pdfLampirans = $meta['lampiran_pdf_paths'];
+        } elseif (is_string($meta['lampiran_pdf_paths'])) {
+            $pdfLampirans = json_decode($meta['lampiran_pdf_paths'], true) ?? [];
+        }
+    }
+    if (empty($pdfLampirans) && !empty($meta['lampiran_pdf_path'])) {
+        $pdfLampirans = [$meta['lampiran_pdf_path']];
+    }
+    $pdfLampirans = array_values(array_unique(array_filter($pdfLampirans)));
+    $hasAdminLampiran = !empty($pdfLampirans);
     ?>
 
     <?php 
@@ -662,7 +676,7 @@ $kepstaNipDisplay = !empty($kepstaNipRaw) ? (str_starts_with(strtoupper(trim($ke
             $subTitle = $totalLampiranPages <= 1 ? '1 Lembar' : "Halaman $lampiranPageNum dari $totalLampiranPages";
         ?>
             <div class="pdf-lampiran-wrapper-col" style="<?= ($pageCountTte === 1) ? 'max-width: 800px; width: 100%; flex: 0 0 800px;' : '' ?>">
-                <?php if (!$isMainPage): ?>
+                <?php if (!$isMainPage && $hasAdminLampiran): ?>
                 <div style="padding: 10px 14px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;" class="no-print">
                     <div style="display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden;">
                         <i class="bi bi-file-earmark-pdf-fill" style="color: #DC2626; font-size: 22px; flex-shrink: 0;"></i>
@@ -1223,25 +1237,6 @@ $kepstaNipDisplay = !empty($kepstaNipRaw) ? (str_starts_with(strtoupper(trim($ke
 
     <!-- DOKUMEN PDF LAMPIRAN TER-UPLOAD -->
     <?php 
-    $pdfLampirans = [];
-    if (!empty($meta['lampiran_pdf_paths'])) {
-        if (is_array($meta['lampiran_pdf_paths'])) {
-            $pdfLampirans = $meta['lampiran_pdf_paths'];
-        } elseif (is_string($meta['lampiran_pdf_paths'])) {
-            $pdfLampirans = json_decode($meta['lampiran_pdf_paths'], true) ?? [];
-        }
-    }
-    if (empty($pdfLampirans) && !empty($meta['lampiran_pdf_path'])) {
-        $pdfLampirans = [$meta['lampiran_pdf_path']];
-    }
-    if (empty($pdfLampirans) && !empty($surat['pdf_path'])) {
-        $pdfLampirans = [$surat['pdf_path']];
-    }
-    if (empty($pdfLampirans) && !empty($meta['pdf_path'])) {
-        $pdfLampirans = [$meta['pdf_path']];
-    }
-    $pdfLampirans = array_values(array_unique(array_filter($pdfLampirans)));
-
     $printableLampiranHtml = '';
     if (!empty($pdfLampirans)) {
         $rows = '';
