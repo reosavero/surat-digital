@@ -1,28 +1,27 @@
 <style>
-/* Reset Password Wizard & Modal Styles */
+/* Reset Password Wizard & Fullscreen Viewport Modal Styles */
 .modal-backdrop-custom {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 999999;
-    display: flex;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(15, 23, 42, 0.7) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    z-index: 9999999 !important;
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 16px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
     box-sizing: border-box;
+    overflow-y: auto;
 }
 
 .modal-backdrop-custom.show {
-    opacity: 1;
-    visibility: visible;
+    display: flex !important;
 }
 
 .modal-card-custom {
@@ -30,17 +29,18 @@
     border-radius: 20px;
     width: 100%;
     max-width: 440px;
+    margin: auto;
     padding: 28px 24px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     position: relative;
-    transform: scale(0.92) translateY(12px);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     box-sizing: border-box;
+    animation: modalScaleIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.modal-backdrop-custom.show .modal-card-custom {
-    transform: scale(1) translateY(0);
+@keyframes modalScaleIn {
+    0% { opacity: 0; transform: scale(0.92) translateY(12px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .modal-close-btn {
@@ -49,13 +49,15 @@
     right: 16px;
     background: transparent;
     border: none;
-    font-size: 24px;
-    line-height: 1;
+    font-size: 16px;
     color: #94A3B8;
     cursor: pointer;
-    padding: 6px;
+    padding: 8px;
     border-radius: 8px;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-close-btn:hover {
@@ -70,15 +72,15 @@
     justify-content: space-between;
     margin-bottom: 22px;
     position: relative;
-    padding: 0 20px;
+    padding: 0 32px;
 }
 
 .modal-wizard-steps::before {
     content: "";
     position: absolute;
     top: 17px;
-    left: 25%;
-    right: 25%;
+    left: 50px;
+    right: 50px;
     height: 3px;
     background: #E2E8F0;
     z-index: 1;
@@ -87,13 +89,12 @@
 .modal-wizard-progress {
     position: absolute;
     top: 17px;
-    left: 25%;
+    left: 50px;
     height: 3px;
     background: #005BAC;
     z-index: 2;
     transition: width 0.35s ease;
     width: 0%;
-    max-width: 50%;
 }
 
 .modal-step-item {
@@ -103,7 +104,6 @@
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    flex: 1;
     text-align: center;
 }
 
@@ -213,7 +213,7 @@
 <div id="otpResetModal" class="modal-backdrop-custom" onclick="handleBackdropClick(event)">
     <div class="modal-card-custom" onclick="event.stopPropagation()">
         <button type="button" class="modal-close-btn" onclick="closeResetModal()" title="Tutup Popup" aria-label="Tutup">
-            &times;
+            <i class="bi bi-x-lg"></i>
         </button>
 
         <div style="text-align: center; margin-bottom: 20px;">
@@ -250,16 +250,16 @@
                 <div style="font-size: 13.5px; color: #1E40AF; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
                     <i class="bi bi-envelope-check-fill" style="font-size: 18px; color: #2563EB;"></i> Periksa Email Anda
                 </div>
-                <div style="font-size: 12.5px; color: #475569; margin-top: 4px; line-height: 1.4;">
-                    Kode OTP 6 digit telah dikirimkan ke <strong id="modalTargetEmail" style="color: #0F172A; word-break: break-all;"></strong>
+                <div style="font-size: 12.5px; color: #475569; margin-top: 5px; line-height: 1.5; word-break: break-word; overflow-wrap: break-word;">
+                    Kode OTP 6 digit telah dikirimkan ke <strong id="modalTargetEmail" style="color: #0F172A; font-weight: 700;"></strong>
                 </div>
             </div>
 
             <form id="formModalOtp" onsubmit="handleModalOtpSubmit(event)" autocomplete="off">
                 <div class="form-group" style="text-align: center; margin-bottom: 16px;">
-                    <label class="form-label" for="modalOtpInput" style="text-align: center; display: block; font-size: 13px;">Masukkan 6 Digit Kode OTP</label>
-                    <div class="input-wrapper" style="max-width: 220px; width: 100%; margin: 0 auto; box-sizing: border-box;">
-                        <input type="text" id="modalOtpInput" class="form-control" placeholder="* * * * * *" maxlength="6" inputmode="numeric" pattern="[0-9]*" required style="letter-spacing: 6px; font-weight: 800; text-align: center; font-size: 20px; padding: 10px 14px !important; width: 100%; box-sizing: border-box;">
+                    <label class="form-label" for="modalOtpInput" style="text-align: center; display: block; font-size: 13px; margin-bottom: 8px;">Masukkan 6 Digit Kode OTP</label>
+                    <div style="max-width: 240px; width: 100%; margin: 0 auto;">
+                        <input type="text" id="modalOtpInput" placeholder="* * * * * *" maxlength="6" inputmode="numeric" pattern="[0-9]*" required style="letter-spacing: 8px !important; font-weight: 800 !important; text-align: center !important; font-size: 22px !important; padding: 10px 14px !important; width: 100% !important; height: 50px !important; border: 1.5px solid #CBD5E1; border-radius: 12px; background: #F8FAFC; outline: none; box-sizing: border-box !important; transition: border-color 0.2s, box-shadow 0.2s;">
                     </div>
                 </div>
 
@@ -356,6 +356,16 @@
 let resendTimer = null;
 let resendCountdown = 0;
 
+// Hoist modal to document.body so it isn't trapped or clipped by .auth-card
+function hoistModalToBody() {
+    var modal = document.getElementById('otpResetModal');
+    if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+}
+hoistModalToBody();
+document.addEventListener('DOMContentLoaded', hoistModalToBody);
+
 function showForgotAlert(msg) {
     const box = document.getElementById('forgotAlertBox');
     box.textContent = msg;
@@ -392,13 +402,16 @@ function togglePassword(btn) {
 }
 
 function openResetModal() {
+    hoistModalToBody();
     const modal = document.getElementById('otpResetModal');
+    if (!modal) return;
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
 }
 
 function closeResetModal() {
     const modal = document.getElementById('otpResetModal');
+    if (!modal) return;
     modal.classList.remove('show');
     document.body.style.overflow = '';
 }
@@ -435,9 +448,9 @@ function goToModalStep(step) {
 
         content1.classList.add('active');
         content2.classList.remove('active');
-        setTimeout(() => document.getElementById('modalOtpInput')?.focus(), 200);
+        setTimeout(() => document.getElementById('modalOtpInput')?.focus(), 250);
     } else if (step === 2) {
-        progressLine.style.width = '50%';
+        progressLine.style.width = 'calc(100% - 100px)';
         stepInd1.className = 'modal-step-item completed';
         num1.innerHTML = '<i class="bi bi-check-lg"></i>';
         stepInd2.className = 'modal-step-item active';
@@ -445,7 +458,7 @@ function goToModalStep(step) {
 
         content1.classList.remove('active');
         content2.classList.add('active');
-        setTimeout(() => document.getElementById('modalNewPassword')?.focus(), 200);
+        setTimeout(() => document.getElementById('modalNewPassword')?.focus(), 250);
     }
 }
 
