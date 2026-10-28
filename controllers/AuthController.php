@@ -315,9 +315,13 @@ class AuthController extends Controller
             // Clear session state
             Session::set('forgot_password_state', null);
 
+            // Set flash for login page
+            Session::setFlash('success', 'Password berhasil diperbarui! Silakan masuk dengan password baru Anda.');
+
             echo json_encode([
                 'success' => true,
-                'message' => 'Password berhasil diperbarui! Silakan masuk dengan password baru Anda.'
+                'message' => 'Password berhasil diperbarui! Silakan masuk dengan password baru Anda.',
+                'redirect' => BASE_URL . '/login'
             ]);
         } catch (Throwable $e) {
             echo json_encode(['success' => false, 'message' => 'Gagal mengubah password: ' . $e->getMessage()]);

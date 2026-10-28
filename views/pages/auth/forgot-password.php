@@ -344,9 +344,9 @@
             <p style="margin: 0 0 22px 0; font-size: 13.5px; color: #64748B; line-height: 1.5;">
                 Password akun Anda telah berhasil diperbarui. Silakan masuk kembali dengan password baru Anda.
             </p>
-            <a href="<?= BASE_URL ?>/login" class="btn btn-primary" style="width: 100%; justify-content: center; background-color: #005BAC; border-color: #005BAC; font-weight: 700; padding: 12px 20px; font-size: 14.5px;">
+            <button type="button" id="btnGoToLogin" onclick="goToLoginPage(event)" class="btn btn-primary" style="width: 100%; justify-content: center; background-color: #005BAC; border-color: #005BAC; font-weight: 700; padding: 12px 20px; font-size: 14.5px; cursor: pointer;">
                 <i class="bi bi-box-arrow-in-right"></i> Masuk Sekarang
-            </a>
+            </button>
         </div>
 
     </div>
@@ -414,6 +414,14 @@ function closeResetModal() {
     if (!modal) return;
     modal.classList.remove('show');
     document.body.style.overflow = '';
+}
+
+function goToLoginPage(e) {
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    window.location.href = '<?= BASE_URL ?>/login';
 }
 
 function handleBackdropClick(e) {
