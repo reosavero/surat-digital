@@ -21,7 +21,10 @@ Route::post('/register/complete', 'RegisterController@complete');
 
 // Forgot Password Routes
 Route::get('/forgot-password', 'AuthController@showForgotPassword');
-Route::post('/forgot-password', 'AuthController@sendResetLink');
+Route::post('/forgot-password', 'AuthController@sendResetOtp');
+Route::post('/forgot-password/send-otp', 'AuthController@sendResetOtp');
+Route::post('/forgot-password/verify-otp', 'AuthController@verifyResetOtp');
+Route::post('/forgot-password/reset-password', 'AuthController@resetPassword');
 
 // Dashboard & Disposisi Routes
 Route::get('/dashboard', 'DashboardController@index');

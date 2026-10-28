@@ -250,8 +250,8 @@
 <!-- ========================================================================= -->
 <!-- MODAL POPUP: CREATE USER (SUPERADMIN) -->
 <!-- ========================================================================= -->
-<div id="createUserModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
-    <div class="card-panel-variant" style="width: 100%; max-width: 560px; margin: 0; padding: 28px; background: #FFFFFF; border-radius: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.25);">
+<div id="createUserModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px); z-index: 2000; overflow-y: auto; padding: 32px 16px; justify-content: center; align-items: flex-start;">
+    <div class="card-panel-variant" style="width: 100%; max-width: 560px; margin: auto; padding: 28px; background: #FFFFFF; border-radius: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); position: relative;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #F3F4F6; padding-bottom: 12px;">
             <h3 style="font-size: 17.5px; font-weight: 800; color: #1E293B; margin: 0; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-person-plus-fill" style="color: #7E22CE;"></i> Tambah Pengguna Baru
@@ -382,8 +382,8 @@
 <!-- ========================================================================= -->
 <!-- MODAL POPUP: EDIT USER (SUPERADMIN) -->
 <!-- ========================================================================= -->
-<div id="editUserModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
-    <div class="card-panel-variant" style="width: 100%; max-width: 540px; margin: 0; padding: 28px; background: #FFFFFF; border-radius: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.25);">
+<div id="editUserModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px); z-index: 2000; overflow-y: auto; padding: 32px 16px; justify-content: center; align-items: flex-start;">
+    <div class="card-panel-variant" style="width: 100%; max-width: 540px; margin: auto; padding: 28px; background: #FFFFFF; border-radius: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); position: relative;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #F3F4F6; padding-bottom: 12px;">
             <h3 style="font-size: 17.5px; font-weight: 800; color: #1E293B; margin: 0; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-pencil-square" style="color: #2563EB;"></i> Edit Data Pengguna
@@ -836,7 +836,11 @@ function openCreateUserModal() {
     if (form) form.reset();
     selectCreateRole('', '');
     selectCreateBidang('');
-    document.getElementById('createUserModal').style.display = 'flex';
+    var modal = document.getElementById('createUserModal');
+    if (modal) {
+        modal.scrollTop = 0;
+        modal.style.display = 'flex';
+    }
 }
 
 function closeCreateUserModal() {
@@ -979,7 +983,11 @@ function openEditUserModal(user) {
     }
 
     updateEditUsernamePreview();
-    document.getElementById('editUserModal').style.display = 'flex';
+    var modal = document.getElementById('editUserModal');
+    if (modal) {
+        modal.scrollTop = 0;
+        modal.style.display = 'flex';
+    }
 }
 
 function closeEditUserModal() {

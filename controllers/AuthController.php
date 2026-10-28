@@ -130,24 +130,203 @@ class AuthController extends Controller
 
     public function showForgotPassword(): void
     {
+        if (Session::isLoggedIn()) {
+            $this->redirect('/dashboard');
+            return;
+        }
+
         $this->layout = 'layouts/auth';
         $this->view('auth/forgot-password', [
             'title' => 'Lupa Password - Surat Digital TVRI Jawa Timur'
         ]);
     }
 
-    public function sendResetLink(): void
+    public function sendResetOtp(): void
     {
-        $email = Security::sanitize($_POST['email'] ?? '');
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
 
-        if (empty($email)) {
-            Session::setFlash('error', 'Alamat email wajib diisi.');
-            $this->redirect('/forgot-password');
+        if (Session::isLoggedIn()) {
+            echo json_encode(['success' => false, 'message' => 'Anda sudah login.']);
             return;
         }
 
-        Session::setFlash('success', 'Instruksi reset password telah dikirimkan ke email Anda.');
-        $this->redirect('/forgot-password');
+        $email = Security::sanitize($_POST['email'] ?? '');
+
+        if (empty($email)) {
+            echo json_encode(['success' => false, 'message' => 'Harap masukkan alamat email Anda.']);
+            return;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['success' => false, 'message' => 'Format email tidak valid.']);
+            return;
+        }
+
+        try {
+            // Check if user exists with this email and is not deleted
+            $user = Database::fetch(
+                "SELECT id, name, username, email, status FROM users WHERE LOWER(email) = LOWER(?) AND deleted_at IS NULL LIMIT 1",
+                [$email]
+            );
+
+            if (!$user) {
+                echo json_encode(['success' => false, 'message' => 'Email tidak terdaftar di sistem Surat Digital.']);
+                return;
+            }
+
+            if ($user['status'] === 'rejected') {
+                echo json_encode(['success' => false, 'message' => 'Akun dengan email ini telah dinonaktifkan atau ditolak.']);
+                return;
+            }
+
+            // Generate 6-digit OTP code
+            $otp = sprintf('%06d', mt_rand(100000, 999999));
+
+            // Save reset state to session
+            Session::set('forgot_password_state', [
+                'user_id' => (int)$user['id'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'otp' => $otp,
+                'otp_verified' => false,
+                'created_at' => time()
+            ]);
+
+            // Attempt to send HTML email via SMTP Mailer
+            $senderEmail = defined('SMTP_FROM') ? SMTP_FROM : 'medsostvrijatim@gmail.com';
+            $subject = "Kode OTP Reset Password Akun Surat Digital TVRI Jatim";
+
+            $bodyHtml = '
+            <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <h2 style="color: #005BAC; margin: 0; font-size: 22px; font-weight: 800;">Surat Digital TVRI Jawa Timur</h2>
+                    <div style="font-size: 13px; color: #64748B; margin-top: 4px;">Permintaan Reset Password Akun</div>
+                </div>
+                <hr style="border: none; border-top: 1px solid #E2E8F0; margin-bottom: 24px;">
+                <p style="font-size: 14px; color: #1E293B; margin-bottom: 16px;">Yth. <strong>' . htmlspecialchars($user['name']) . '</strong>,</p>
+                <p style="font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 24px;">
+                    Kami menerima permintaan untuk mereset password akun Surat Digital TVRI Jawa Timur Anda. Berikut adalah Kode OTP (One-Time Password) untuk verifikasi:
+                </p>
+                <div style="text-align: center; margin-bottom: 28px;">
+                    <div style="display: inline-block; background: #EFF6FF; border: 2px dashed #2563EB; padding: 14px 32px; border-radius: 12px;">
+                        <span style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #1D4ED8;">' . $otp . '</span>
+                    </div>
+                </div>
+                <p style="font-size: 13px; color: #64748B; line-height: 1.5; margin-bottom: 24px;">
+                    Harap masukkan 6 digit kode OTP di atas pada popup verifikasi reset password. Jangan berikan kode ini kepada siapapun demi keamanan akun Anda.
+                </p>
+                <hr style="border: none; border-top: 1px solid #E2E8F0; margin-bottom: 20px;">
+                <div style="font-size: 11.5px; color: #94A3B8; text-align: center;">
+                    Pesan otomatis dikirim oleh Sistem Informasi Surat Digital LPP TVRI Stasiun Jawa Timur.<br>
+                    Email Pengirim: ' . htmlspecialchars($senderEmail) . '
+                </div>
+            </div>';
+
+            Mailer::send($user['email'], $subject, $bodyHtml);
+
+            // Log OTP locally for audit/fallback logging
+            $logLine = date('Y-m-d H:i:s') . " | Reset Password OTP to {$user['email']} from {$senderEmail} | Code: {$otp}\n";
+            @file_put_contents(__DIR__ . '/../logs/otp.log', $logLine, FILE_APPEND);
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Kode OTP telah dikirimkan ke email {$user['email']}.",
+                'email' => $user['email'],
+                'sender' => $senderEmail
+            ]);
+        } catch (Throwable $e) {
+            echo json_encode(['success' => false, 'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+        }
+    }
+
+    public function verifyResetOtp(): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
+
+        $inputOtp = Security::sanitize($_POST['otp'] ?? '');
+        $forgotData = Session::get('forgot_password_state', null);
+
+        if (!$forgotData || empty($forgotData['otp'])) {
+            echo json_encode(['success' => false, 'message' => 'Sesi reset password tidak ditemukan atau kedaluwarsa. Harap kirim ulang kode OTP.']);
+            return;
+        }
+
+        if (empty($inputOtp)) {
+            echo json_encode(['success' => false, 'message' => 'Harap masukkan 6 digit kode OTP.']);
+            return;
+        }
+
+        if ($inputOtp !== $forgotData['otp']) {
+            echo json_encode(['success' => false, 'message' => 'Kode OTP salah. Harap periksa kembali email Anda.']);
+            return;
+        }
+
+        // Mark OTP verified in session
+        $forgotData['otp_verified'] = true;
+        Session::set('forgot_password_state', $forgotData);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Kode OTP berhasil diverifikasi! Silakan buat password baru Anda.'
+        ]);
+    }
+
+    public function resetPassword(): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
+
+        $password = $_POST['password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+        $forgotData = Session::get('forgot_password_state', null);
+
+        if (!$forgotData || empty($forgotData['otp_verified']) || !$forgotData['otp_verified']) {
+            echo json_encode(['success' => false, 'message' => 'Verifikasi OTP belum selesai. Harap lakukan verifikasi OTP terlebih dahulu.']);
+            return;
+        }
+
+        if (empty($password) || empty($confirmPassword)) {
+            echo json_encode(['success' => false, 'message' => 'Password baru dan konfirmasi password wajib diisi.']);
+            return;
+        }
+
+        if (strlen($password) < 6) {
+            echo json_encode(['success' => false, 'message' => 'Password minimal harus 6 karakter.']);
+            return;
+        }
+
+        if ($password !== $confirmPassword) {
+            echo json_encode(['success' => false, 'message' => 'Konfirmasi password tidak cocok dengan password baru.']);
+            return;
+        }
+
+        try {
+            $hashedPassword = Security::hashPassword($password);
+            Database::query(
+                "UPDATE users SET password = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL",
+                [$hashedPassword, $forgotData['user_id']]
+            );
+
+            // Clear session state
+            Session::set('forgot_password_state', null);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Password berhasil diperbarui! Silakan masuk dengan password baru Anda.'
+            ]);
+        } catch (Throwable $e) {
+            echo json_encode(['success' => false, 'message' => 'Gagal mengubah password: ' . $e->getMessage()]);
+        }
+    }
+
+    public function sendResetLink(): void
+    {
+        $this->sendResetOtp();
     }
 
     public function profile(): void
