@@ -1,0 +1,392 @@
+/**
+ * Surat Digital TVRI Jawa Timur
+ * Premium Custom Calendar Popup Theme (Flatpickr Enhancement)
+ * TVRI Enterprise Design System
+ */
+
+/* ==========================================================================
+   1. Datepicker Input Wrapper & Visual Field
+   ========================================================================== */
+.modern-datepicker-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.modern-datepicker-wrapper .form-input-custom,
+.modern-datepicker-wrapper input.modern-datepicker-alt,
+.modern-datepicker-wrapper input.flatpickr-input {
+    width: 100%;
+    height: 44px;
+    padding: 10px 42px 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #CBD5E1;
+    font-size: 13.5px;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    color: #0F172A;
+    background-color: #FFFFFF;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.modern-datepicker-wrapper .form-input-custom:hover,
+.modern-datepicker-wrapper input.modern-datepicker-alt:hover,
+.modern-datepicker-wrapper input.flatpickr-input:hover {
+    border-color: #94A3B8;
+    background-color: #F8FAFC;
+}
+
+.modern-datepicker-wrapper .form-input-custom:focus,
+.modern-datepicker-wrapper input.modern-datepicker-alt:focus,
+.modern-datepicker-wrapper input.modern-datepicker-alt.active,
+.modern-datepicker-wrapper input.flatpickr-input:focus,
+.modern-datepicker-wrapper input.flatpickr-input.active {
+    outline: none;
+    border-color: #2563EB;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.15);
+}
+
+.modern-datepicker-wrapper .datepicker-calendar-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #2563EB;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.modern-datepicker-wrapper .datepicker-calendar-icon:hover {
+    background: #EFF6FF;
+    color: #1D4ED8;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.modern-datepicker-wrapper:focus-within .datepicker-calendar-icon {
+    color: #003399;
+}
+
+/* ==========================================================================
+   2. Calendar Popup Container
+   ========================================================================== */
+.flatpickr-calendar {
+    background: #FFFFFF !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 20px 45px -10px rgba(10, 25, 47, 0.22), 0 0 0 1px rgba(0, 51, 153, 0.06) !important;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    width: 318px !important;
+    overflow: hidden !important;
+    z-index: 99999 !important;
+    padding: 0 !important;
+    margin-top: 6px !important;
+}
+
+/* Hide Default Arrow Triangle for cleaner floating card aesthetic */
+.flatpickr-calendar::before,
+.flatpickr-calendar::after {
+    display: none !important;
+}
+
+/* Smooth Entrance Animation */
+.flatpickr-calendar.animate.open {
+    animation: fpModernSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes fpModernSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ==========================================================================
+   3. Calendar Header (Gradient, Month & Year Nav)
+   ========================================================================== */
+.flatpickr-months {
+    background: linear-gradient(135deg, #0A192F 0%, #003399 65%, #1D4ED8 100%) !important;
+    padding: 12px 14px !important;
+    border-radius: 18px 18px 0 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 54px !important;
+    position: relative !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+}
+
+.flatpickr-months .flatpickr-month {
+    height: auto !important;
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: visible !important;
+    background: transparent !important;
+}
+
+.flatpickr-current-month {
+    padding: 0 !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    position: static !important;
+    width: auto !important;
+    transform: none !important;
+    pointer-events: none !important;
+    cursor: default !important;
+    user-select: none !important;
+}
+
+/* Static Month Label (Teks Bulan) */
+.flatpickr-current-month .cur-month {
+    font-size: 15.5px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    font-family: inherit !important;
+    letter-spacing: -0.01em !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+    cursor: default !important;
+}
+
+/* Static Year Label (Teks Tahun) */
+.flatpickr-current-month .numInputWrapper {
+    width: auto !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
+}
+
+.flatpickr-current-month input.cur-year {
+    font-size: 15.5px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    font-family: inherit !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    text-align: left !important;
+    width: auto !important;
+    max-width: 52px !important;
+    pointer-events: none !important;
+    cursor: default !important;
+    user-select: none !important;
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+}
+
+/* Hide native number input spinners on webkit browsers */
+.flatpickr-current-month input.cur-year::-webkit-outer-spin-button,
+.flatpickr-current-month input.cur-year::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    display: none !important;
+}
+
+/* Completely remove and hide flatpickr year up/down arrow buttons */
+.flatpickr-current-month .numInputWrapper span.arrowUp,
+.flatpickr-current-month .numInputWrapper span.arrowDown {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+    border: none !important;
+}
+
+/* Next / Prev Navigation Buttons */
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    position: static !important;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    z-index: 5 !important;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+    transform: scale(1.06) !important;
+}
+
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg {
+    width: 14px !important;
+    height: 14px !important;
+    fill: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   4. Weekdays Header - HIDDEN per request (Sen, Sel, Rab, Kam, Jum, Sab, Min)
+   ========================================================================== */
+.flatpickr-weekdays,
+.flatpickr-weekdaycontainer,
+span.flatpickr-weekday {
+    display: none !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    visibility: hidden !important;
+}
+
+/* ==========================================================================
+   5. Day Grid & Cells
+   ========================================================================== */
+.flatpickr-innerContainer {
+    padding: 14px 10px 14px 10px !important;
+}
+
+.flatpickr-days {
+    width: 100% !important;
+    background: #FFFFFF !important;
+}
+
+.dayContainer {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 2px !important;
+    padding: 0 !important;
+}
+
+.flatpickr-day {
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 38px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #1E293B !important;
+    border: 1px solid transparent !important;
+    margin: 1px auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.15s ease-in-out !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+}
+
+.flatpickr-day:hover {
+    background: #EEF2FF !important;
+    color: #1D4ED8 !important;
+    border-color: #BFDBFE !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Today's Cell */
+.flatpickr-day.today {
+    border-color: #3B82F6 !important;
+    color: #1D4ED8 !important;
+    font-weight: 800 !important;
+    background: #EFF6FF !important;
+    position: relative !important;
+}
+
+.flatpickr-day.today::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 3.5px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 4px !important;
+    height: 4px !important;
+    border-radius: 50% !important;
+    background: #2563EB !important;
+}
+
+/* Selected Cell */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover,
+.flatpickr-day.selected:focus {
+    background: linear-gradient(135deg, #003399 0%, #2563EB 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
+    transform: scale(1.04) !important;
+}
+
+.flatpickr-day.selected.today::after {
+    background: #FFFFFF !important;
+}
+
+/* Previous and Next Month Days */
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+    color: #CBD5E1 !important;
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover {
+    background: #F8FAFC !important;
+    color: #94A3B8 !important;
+}
+
+/* Disabled Days */
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    color: #E2E8F0 !important;
+    cursor: not-allowed !important;
+    background: transparent !important;
+}
+
+/* ==========================================================================
+   6. Custom Popup Action Footer - HIDDEN per request (Hari Ini & Tutup removed)
+   ========================================================================== */
+.flatpickr-custom-footer,
+.btn-fp-today,
+.btn-fp-close {
+    display: none !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    visibility: hidden !important;
+}

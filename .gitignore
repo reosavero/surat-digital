@@ -1,0 +1,55 @@
+# ==========================================
+# Surat Digital TVRI Jawa Timur - .gitignore
+# ==========================================
+
+# Local configurations & secrets (NEVER commit credentials)
+config/*.local.php
+*.local.php
+.env
+.env.*
+!.env.example
+
+# Scratchpad, tests, and temporary development scripts
+scratch/
+
+# Application logs (contains OTPs, mail transactions, debug output)
+logs/**
+!logs/**/
+!logs/**/.gitkeep
+*.log
+
+# Uploaded documents and confidential signatures
+uploads/**
+!uploads/**/
+!uploads/**/.gitkeep
+
+public/uploads/**
+!public/uploads/**/
+!public/uploads/**/.gitkeep
+
+# Operating System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.lnk
+
+# IDE / Code Editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Dependencies
+vendor/
+node_modules/
+
+# Temporary / Cache files
+*.tmp
+*.temp
+*.bak

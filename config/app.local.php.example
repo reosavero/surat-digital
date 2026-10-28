@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * Local Configuration Template - Surat Digital TVRI Jawa Timur
+ * Copy this file to `app.local.php` and set your credentials as needed.
+ */
+
+define('SMTP_PASS', 'your_gmail_app_password_here');

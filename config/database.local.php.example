@@ -1,0 +1,12 @@
+<?php
+
+/**
+ * Local Database Configuration Example - Surat Digital
+ * Copy this file to `database.local.php` to customize database credentials.
+ */
+
+// define('DB_HOST', 'localhost');
+// define('DB_PORT', '3306');
+// define('DB_NAME', 'surat_digital');
+// define('DB_USER', 'root');
+// define('DB_PASS', '');
