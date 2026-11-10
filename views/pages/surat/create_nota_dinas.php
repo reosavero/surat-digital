@@ -1,12 +1,10 @@
 <?php
-$kategoriLabel = 'Surat Nota Dinas';
+$kategoriLabel = 'Surat Cuti';
 $currentUser = $currentUser ?? [];
-$pemohonNama = !empty($currentUser['name']) ? $currentUser['name'] : 'Bagus Mahendra Putra';
-$rawNip = $currentUser['nip'] ?? '';
-$pemohonNopeg = !empty($currentUser['nopeg']) ? $currentUser['nopeg'] : '202205 29091996';
-$pemohonJabatan = !empty($currentUser['jabatan']) ? $currentUser['jabatan'] : 'Staf Umum/Pengemudi';
-$pemohonHp = !empty($currentUser['phone']) ? $currentUser['phone'] : '0856-4582-3054';
-$pemohonSignature = $currentUser['signature'] ?? '';
+$defaultPemohonNama = '';
+$defaultPemohonNopeg = '';
+$defaultPemohonJabatan = '';
+$defaultPemohonHp = '';
 
 $tuAccount = User::getSingleUserByRole('tata_usaha') ?: [];
 $tuNama = $tuAccount['name'] ?? 'Maya Sulfiana, S.Kom';
@@ -19,19 +17,27 @@ $meta = $surat['meta'] ?? [];
 $catatanRevisi = $meta['catatan_revisi'] ?? '';
 
 $valNomorSurat = $isEdit ? ($surat['nomor_surat'] ?? '') : '';
-$valPerihal = $isEdit ? $surat['perihal'] : 'Permohonan Cuti Tahunan';
+$valPerihal = $isEdit ? $surat['perihal'] : '';
 $valSifat = $isEdit ? ($meta['sifat_surat'] ?? 'Biasa') : 'Biasa';
-$valLampiran = $isEdit ? $surat['lampiran'] : '1 (lembar)';
+$valLampiran = $isEdit ? $surat['lampiran'] : '';
 $valTanggal = $isEdit ? $surat['tanggal_surat'] : date('Y-m-d');
 
-$valPemohonNama = $isEdit ? ($meta['pemohon_nama'] ?? $pemohonNama) : $pemohonNama;
-$valPemohonNopeg = $isEdit ? ($meta['pemohon_nopeg'] ?? $pemohonNopeg) : $pemohonNopeg;
-$valPemohonJabatan = $isEdit ? ($meta['pemohon_jabatan'] ?? $pemohonJabatan) : $pemohonJabatan;
-$valPemohonHp = $isEdit ? ($meta['pemohon_hp'] ?? $pemohonHp) : $pemohonHp;
+$valPemohonNama = $isEdit ? (!empty($meta['pemohon_nama']) && $meta['pemohon_nama'] !== 'Admin Pembuat Surat' ? $meta['pemohon_nama'] : '') : '';
+$valPemohonNopeg = $isEdit ? (!empty($meta['pemohon_nopeg']) ? $meta['pemohon_nopeg'] : (!empty($meta['pemohon_nip']) ? $meta['pemohon_nip'] : '')) : '';
+$valPemohonJabatan = $isEdit ? (!empty($meta['pemohon_jabatan']) && $meta['pemohon_jabatan'] !== 'Admin' ? $meta['pemohon_jabatan'] : '') : '';
+$valPemohonHp = $isEdit ? (!empty($meta['pemohon_hp']) ? $meta['pemohon_hp'] : '') : '';
 
-$valIsiSurat = $isEdit ? ($meta['isi_surat_dinas'] ?? $surat['isi_surat']) : "Dengan ini mengajukan Cuti Tahunan selama 2 (dua) hari kerja, terhitung mulai tanggal 26 sampai dengan 27 September 2026.\n\nSelama menjalankan cuti, pelaksanaan tugas dan pekerjaan yang menjadi tanggung jawab saya akan dikoordinasikan dengan Sdr. M. Faisal Mahardika agar pelayanan dan pelaksanaan pekerjaan tetap berjalan sebagaimana mestinya.";
-$valPenutupSurat = $isEdit ? ($meta['penutup_surat'] ?? 'Demikian permohonan cuti ini saya sampaikan. Besar harapan saya kiranya Bapak Kepala TVRI Stasiun Jawa Timur Berkenan memberikan persetujuan atas pengajuan cuti tersebut. Atas perhatian dan persetujuannya, saya ucapkan terima kasih.') : 'Demikian permohonan cuti ini saya sampaikan. Besar harapan saya kiranya Bapak Kepala TVRI Stasiun Jawa Timur Berkenan memberikan persetujuan atas pengajuan cuti tersebut. Atas perhatian dan persetujuannya, saya ucapkan terima kasih.';
+$defaultCutiIsi = '';
+$valIsiSurat = $isEdit ? (!empty($meta['isi_surat_dinas']) ? $meta['isi_surat_dinas'] : (!empty($surat['isi_surat']) ? $surat['isi_surat'] : '')) : '';
 
+$defaultCutiPenutup = "Demikian permohonan cuti ini saya sampaikan. Besar harapan saya kiranya Bapak Kepala TVRI Stasiun Jawa Timur Berkenan memberikan persetujuan atas pengajuan cuti tersebut. Atas perhatian dan persetujuannya, saya ucapkan terima kasih.";
+$valPenutupSurat = $isEdit ? (!empty($meta['penutup_surat']) ? $meta['penutup_surat'] : $defaultCutiPenutup) : $defaultCutiPenutup;
+
+$existingPemohonSig = !empty($meta['pemohon_signature_data']) ? $meta['pemohon_signature_data'] : (!empty($meta['pemohon_signature']) ? $meta['pemohon_signature'] : ($surat['pemohon_signature'] ?? ''));
+$hasPemohonSig = !empty($existingPemohonSig);
+
+$valKapelSdmUser = $kapelSdmUser ?? (class_exists('User') ? User::getKapelSdmUser() : null);
+$valKapelSdmId = $valKapelSdmUser ? $valKapelSdmUser['id'] : 56;
 $valKppUserId = $isEdit ? ($surat['kpp_user_id'] ?? '') : '';
 $valGDriveLink = $isEdit ? ($surat['gdrive_web_link'] ?? '') : '';
 
@@ -242,12 +248,21 @@ if ($isEdit) {
     box-sizing: border-box;
     margin-bottom: 20px;
 }
+@media (max-width: 768px) {
+    .pdf-lampiran-wrapper-col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+}
 
 .review-modal-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
 }
 @media (max-width: 640px) {
     .review-modal-footer {
@@ -303,7 +318,7 @@ if ($isEdit) {
     <div class="page-header-banner" style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
             <h1 style="font-size: 22px; font-weight: 800; color: var(--text-heading); margin: 0; display: flex; align-items: center; gap: 10px;">
-                <i class="bi bi-file-earmark-text-fill" style="color: #2563EB;"></i> <?= $isEdit ? 'Revisi Surat Nota Dinas' : 'Form Pembuatan Surat Nota Dinas' ?>
+                <i class="bi bi-file-earmark-text-fill" style="color: #2563EB;"></i> <?= $isEdit ? 'Revisi Surat Cuti' : 'Form Pembuatan Surat Cuti' ?>
             </h1>
         </div>
     </div>
@@ -356,7 +371,7 @@ if ($isEdit) {
                     </div>
                     <div>
                         <h2 style="font-size: 17px; font-weight: 800; color: #1E3A8A; margin: 0; display: flex; align-items: center; gap: 8px;">
-                            <i class="bi bi-file-earmark-text-fill" style="color: #2563EB;"></i> BAGIAN 1: SURAT NOTA DINAS
+                            <i class="bi bi-file-earmark-text-fill" style="color: #2563EB;"></i> BAGIAN 1: SURAT CUTI
                         </h2>
                     </div>
                 </div>
@@ -366,14 +381,14 @@ if ($isEdit) {
             <input type="hidden" name="kepada" id="inKepada" value="Kepala TVRI Stasiun Jawa Timur">
             <input type="hidden" name="dari" id="inDari" value="Kepala Sub Bagian Tata Usaha">
 
-            <!-- Editable Inputs for Header Nota Dinas -->
+            <!-- Editable Inputs for Header Surat Cuti -->
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px;">
                 <div class="form-group-block">
-                    <label class="form-label-custom">Nomor Surat Nota Dinas</label>
-                    <input type="text" name="nomor_surat" id="inNomorSurat" value="<?= htmlspecialchars($valNomorSurat) ?>" placeholder="Contoh: 1231/KP.09.02/I1.1.1/IX/2026" class="form-input-custom">
+                    <label class="form-label-custom">Nomor Surat Cuti</label>
+                    <input type="text" name="nomor_surat" id="inNomorSurat" value="<?= htmlspecialchars($valNomorSurat) ?>" class="form-input-custom">
                 </div>
                 <div class="form-group-block">
-                    <label class="form-label-custom">Hal / Perihal Nota Dinas</label>
+                    <label class="form-label-custom">Hal / Perihal Surat Cuti</label>
                     <input type="text" name="perihal" id="inHal" value="<?= htmlspecialchars($valPerihal) ?>" required class="form-input-custom">
                 </div>
                 <div class="form-group-block">
@@ -413,9 +428,9 @@ if ($isEdit) {
                     <input type="text" name="lampiran" id="inLampiran" value="<?= htmlspecialchars($valLampiran) ?>" required class="form-input-custom">
                 </div>
                 <div class="form-group-block">
-                    <label class="form-label-custom">Tanggal Nota Dinas</label>
+                    <label class="form-label-custom">Tanggal Surat Cuti</label>
                     <div class="modern-datepicker-wrapper">
-                        <input type="text" name="tanggal_surat" id="inTanggal" value="<?= htmlspecialchars($valTanggal) ?>" required class="form-input-custom modern-datepicker" placeholder="Pilih tanggal nota dinas...">
+                        <input type="text" name="tanggal_surat" id="inTanggal" value="<?= htmlspecialchars($valTanggal) ?>" required class="form-input-custom modern-datepicker" placeholder="Pilih tanggal surat cuti...">
                         <span class="datepicker-calendar-icon" title="Buka Kalender">
                             <i class="bi bi-calendar2-event-fill"></i>
                         </span>
@@ -453,41 +468,28 @@ if ($isEdit) {
             </div>
 
             <div class="form-group-block" style="margin-bottom: 18px;">
-                <label class="form-label-custom">Isi Surat Nota Dinas</label>
+                <label class="form-label-custom">Isi Surat Permohonan Cuti</label>
                 <textarea name="isi_surat" id="inIsiSurat" rows="6" class="form-input-custom" required><?= htmlspecialchars($valIsiSurat) ?></textarea>
             </div>
 
             <!-- Penutup Surat Default Hidden Input -->
             <input type="hidden" name="penutup_surat" id="inPenutupSurat" value="<?= htmlspecialchars($valPenutupSurat) ?>">
 
-            <!-- GRID 2 KOLOM: TTD PEMOHON (KIRI) & PENANDATANGAN KPP BIDANG (KANAN) -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 22px; align-items: flex-start;">
-                <!-- Tanda Tangan Digital Pemohon (Sisi Kiri) -->
-                <div class="form-group-block">
-                    <label class="form-label-custom" style="font-weight: 700; color: #1E3A8A; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <i class="bi bi-pen-fill"></i> Tanda Tangan Digital Pemohon
-                    </label>
-                    
-                    <div>
-                        <div onclick="openSignatureModal()" title="Klik untuk membuat / menggambar TTD Digital Pemohon"
-                             style="position: relative; width: 180px; height: 80px; background: #F8FAFC; border: 2px dashed #2563EB; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; transition: background 0.2s;"
-                             onmouseover="this.style.background='#EFF6FF';" onmouseout="this.style.background='#F8FAFC';">
-                            <img id="formPemohonTtdImg" src="" style="max-height: 70px; object-fit: contain; display: none;">
-                            <div id="formPemohonTtdPlaceholder" style="text-align: center; color: #64748B; font-size: 12px;">
-                                <i class="bi bi-pencil-square" style="font-size: 20px; color: #2563EB; display: block; margin-bottom: 4px;"></i>
-                                Klik untuk Isi TTD
-                            </div>
-                        </div>
-                    </div>
-
-                    <input type="hidden" name="pemohon_signature_data" id="pemohonSignatureData" value="">
-                    <input type="hidden" name="penandatangan_nama" id="inPenandatanganNama" value="<?= htmlspecialchars($tuNama) ?>">
-                    <input type="hidden" name="penandatangan_nip" id="inPenandatanganNip" value="<?= htmlspecialchars($tuNip) ?>">
-                    <input type="hidden" name="penandatangan_jabatan" id="inPenandatanganJabatan" value="Kepala Sub Bagian Tata Usaha TVRI Stasiun Jawa Timur">
-                </div>
-
-                <!-- Penandatangan Surat (KPP Bidang) (Sisi Kanan) -->
+            <!-- Tanda Tangan Digital Pemohon (Kiri) & Penandatangan Surat KPP Bidang (Kanan) -->
             <style>
+                .cuti-signature-penandatangan-grid {
+                    display: grid;
+                    grid-template-columns: minmax(200px, 240px) 1fr;
+                    gap: 28px;
+                    align-items: flex-start;
+                    margin-bottom: 22px;
+                }
+                @media (max-width: 768px) {
+                    .cuti-signature-penandatangan-grid {
+                        grid-template-columns: 1fr;
+                        gap: 16px;
+                    }
+                }
                 #kppBidangDropdownMenu {
                     border: 1.5px solid #2563EB !important;
                     border-radius: 14px !important;
@@ -517,66 +519,93 @@ if ($isEdit) {
                     color: #1D4ED8 !important;
                 }
             </style>
-            <div class="form-group-block" style="position: relative;">
-                <label class="form-label-custom" style="font-weight: 700; margin-bottom: 8px; color: #1E293B;">
-                    Penandatangan Surat (KPP Bidang)
-                </label>
-                
-                <div class="input-wrapper" id="kppBidangContainer" style="position: relative; max-width: 440px; width: 100%;">
-                    <input type="hidden" name="kpp_user_id" id="inKppUserId" value="<?= htmlspecialchars($valKppUserId) ?>" required>
 
-                    <button type="button" class="custom-select-trigger" id="kppBidangDropdownTrigger" onclick="toggleKppBidangMenu(event)" style="width: 100%; display: flex; align-items: center; justify-content: space-between; height: 46px; padding: 10px 16px; background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 12px; font-size: 14px; color: #1F2937; font-weight: normal; cursor: pointer; transition: all 0.2s ease; outline: none; position: relative;">
-                        <span id="kppBidangSelectedText" style="color: #9CA3AF; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: normal;">-- Pilih KPP Bidang --</span>
-                        <i class="bi bi-chevron-down" id="kppBidangChevronIcon" style="font-size: 13px; color: #6B7280; transition: transform 0.2s ease;"></i>
-                    </button>
+            <div class="cuti-signature-penandatangan-grid">
+                <!-- Kiri: Tanda Tangan Digital Pemohon -->
+                <div class="form-group-block" style="margin-bottom: 0;">
+                    <label class="form-label-custom" style="font-weight: 700; color: #1E3A8A; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <i class="bi bi-pen-fill"></i> Tanda Tangan Digital Pemohon
+                    </label>
+                    
+                    <div>
+                        <div onclick="openSignatureModal()" title="Klik untuk membuat / menggambar TTD Digital Pemohon"
+                             style="position: relative; width: 180px; height: 80px; background: #F8FAFC; border: 2px dashed #2563EB; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; transition: background 0.2s;"
+                             onmouseover="this.style.background='#EFF6FF';" onmouseout="this.style.background='#F8FAFC';">
+                            <img id="formPemohonTtdImg" src="<?= $hasPemohonSig ? getImgUrl(makeSignatureBlue($existingPemohonSig)) : '' ?>" style="max-height: 70px; object-fit: contain; <?= $hasPemohonSig ? 'display: block;' : 'display: none;' ?>">
+                            <div id="formPemohonTtdPlaceholder" style="text-align: center; color: #64748B; font-size: 12px; <?= $hasPemohonSig ? 'display: none;' : '' ?>">
+                                <i class="bi bi-pencil-square" style="font-size: 20px; color: #2563EB; display: block; margin-bottom: 4px;"></i>
+                                Klik untuk Isi TTD
+                            </div>
+                        </div>
+                    </div>
 
-                    <!-- Custom Positioned Dropdown Popup Menu for Selecting KPP Bidang -->
-                    <div id="kppBidangDropdownMenu" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%; width: 100%; z-index: 99999; background: #FFFFFF; border-radius: 14px; box-shadow: 0 20px 45px -8px rgba(0,0,0,0.22), 0 8px 18px -4px rgba(0,0,0,0.1); border: 1.5px solid #2563EB; padding: 8px; box-sizing: border-box;">
-                        <div style="max-height: 250px; overflow-y: auto; padding-right: 2px;" id="kppBidangOptionsList">
-                            <?php if (!empty($kppUsers)): ?>
-                                <?php foreach ($kppUsers as $kpp): ?>
-                                    <?php 
-                                        $nipText = !empty($kpp['nip']) ? (str_starts_with(strtoupper($kpp['nip']), 'NIP') ? $kpp['nip'] : 'NIP. ' . $kpp['nip']) : '';
-                                        $jabatanText = !empty($kpp['jabatan']) ? $kpp['jabatan'] : ('Ketua Perencana dan Pengendalian ' . ($kpp['divisi'] ?? ''));
-                                        $divisiText = $kpp['divisi'] ?? '';
-                                        $sigText = $kpp['signature'] ?? '';
-                                        $displayName = 'KPP ' . htmlspecialchars($divisiText) . ' - ' . htmlspecialchars($kpp['name']);
-                                        $isSelected = (!empty($valKppUserId) && $valKppUserId == $kpp['id']);
-                                    ?>
-                                    <div class="custom-kpp-option-item <?= $isSelected ? 'is-selected' : '' ?>" 
-                                         data-val="<?= $kpp['id'] ?>"
-                                         data-label="<?= $displayName ?>"
-                                         data-nama="<?= htmlspecialchars($kpp['name']) ?>"
-                                         data-nip="<?= htmlspecialchars($nipText) ?>"
-                                         data-jabatan="<?= htmlspecialchars($jabatanText) ?>"
-                                         data-divisi="<?= htmlspecialchars($divisiText) ?>"
-                                         data-signature="<?= htmlspecialchars($sigText) ?>"
-                                         onclick="selectKppBidangOption(<?= $kpp['id'] ?>, this)"
-                                         style="display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 10px; cursor: pointer; transition: all 0.15s ease; margin-bottom: 3px; <?= $isSelected ? 'background: #EFF6FF; border: 1px solid #BFDBFE;' : 'background: #FFFFFF; border: 1px solid transparent;' ?>">
-                                        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                                            <div class="kpp-avatar-wrap" style="width: 32px; height: 32px; border-radius: 8px; background: <?= $isSelected ? '#DBEAFE' : '#F1F5F9' ?>; color: <?= $isSelected ? '#1D4ED8' : '#475569' ?>; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0;">
-                                                <i class="bi bi-person-check-fill"></i>
+                    <input type="hidden" name="pemohon_signature_data" id="pemohonSignatureData" value="<?= htmlspecialchars($existingPemohonSig) ?>">
+                    <input type="hidden" name="penandatangan_nama" id="inPenandatanganNama" value="<?= htmlspecialchars($tuNama) ?>">
+                    <input type="hidden" name="penandatangan_nip" id="inPenandatanganNip" value="<?= htmlspecialchars($tuNip) ?>">
+                    <input type="hidden" name="penandatangan_jabatan" id="inPenandatanganJabatan" value="Kepala Sub Bagian Tata Usaha TVRI Stasiun Jawa Timur">
+                </div>
+
+                <!-- Kanan: Penandatangan Surat (KPP Bidang) -->
+                <div class="form-group-block" style="margin-bottom: 0; position: relative;">
+                    <label class="form-label-custom" style="font-weight: 700; margin-bottom: 8px; color: #1E293B; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-person-check-fill" style="color: #2563EB;"></i> Penandatangan Surat (KPP Bidang)
+                    </label>
+                    
+                    <div class="input-wrapper" id="kppBidangContainer" style="position: relative; max-width: 440px; width: 100%;">
+                        <input type="hidden" name="kpp_user_id" id="inKppUserId" value="<?= htmlspecialchars($valKppUserId) ?>" required>
+
+                        <button type="button" class="custom-select-trigger" id="kppBidangDropdownTrigger" onclick="toggleKppBidangMenu(event)" style="width: 100%; display: flex; align-items: center; justify-content: space-between; height: 46px; padding: 10px 16px; background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 12px; font-size: 14px; color: #1F2937; font-weight: normal; cursor: pointer; transition: all 0.2s ease; outline: none; position: relative;">
+                            <span id="kppBidangSelectedText" style="color: #9CA3AF; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: normal;">-- Pilih KPP Bidang --</span>
+                            <i class="bi bi-chevron-down" id="kppBidangChevronIcon" style="font-size: 13px; color: #6B7280; transition: transform 0.2s ease;"></i>
+                        </button>
+
+                        <!-- Custom Positioned Dropdown Popup Menu for Selecting KPP Bidang -->
+                        <div id="kppBidangDropdownMenu" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%; width: 100%; z-index: 99999; background: #FFFFFF; border-radius: 14px; box-shadow: 0 20px 45px -8px rgba(0,0,0,0.22), 0 8px 18px -4px rgba(0,0,0,0.1); border: 1.5px solid #2563EB; padding: 8px; box-sizing: border-box;">
+                            <div style="max-height: 250px; overflow-y: auto; padding-right: 2px;" id="kppBidangOptionsList">
+                                <?php if (!empty($kppUsers)): ?>
+                                    <?php foreach ($kppUsers as $kpp): ?>
+                                        <?php 
+                                            $nipText = !empty($kpp['nip']) ? (str_starts_with(strtoupper($kpp['nip']), 'NIP') ? $kpp['nip'] : 'NIP. ' . $kpp['nip']) : '';
+                                            $jabatanText = !empty($kpp['jabatan']) ? $kpp['jabatan'] : ('Ketua Perencana dan Pengendalian ' . ($kpp['divisi'] ?? ''));
+                                            $divisiText = $kpp['divisi'] ?? '';
+                                            $sigText = $kpp['signature'] ?? '';
+                                            $displayName = 'KPP ' . htmlspecialchars($divisiText) . ' - ' . htmlspecialchars($kpp['name']);
+                                            $isSelected = (!empty($valKppUserId) && $valKppUserId == $kpp['id']);
+                                        ?>
+                                        <div class="custom-kpp-option-item <?= $isSelected ? 'is-selected' : '' ?>" 
+                                             data-val="<?= $kpp['id'] ?>"
+                                             data-label="<?= $displayName ?>"
+                                             data-nama="<?= htmlspecialchars($kpp['name']) ?>"
+                                             data-nip="<?= htmlspecialchars($nipText) ?>"
+                                             data-jabatan="<?= htmlspecialchars($jabatanText) ?>"
+                                             data-divisi="<?= htmlspecialchars($divisiText) ?>"
+                                             data-signature="<?= htmlspecialchars($sigText) ?>"
+                                             onclick="selectKppBidangOption(<?= $kpp['id'] ?>, this)"
+                                             style="display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 10px; cursor: pointer; transition: all 0.15s ease; margin-bottom: 3px; <?= $isSelected ? 'background: #EFF6FF; border: 1px solid #BFDBFE;' : 'background: #FFFFFF; border: 1px solid transparent;' ?>">
+                                            <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                                                <div class="kpp-avatar-wrap" style="width: 32px; height: 32px; border-radius: 8px; background: <?= $isSelected ? '#DBEAFE' : '#F1F5F9' ?>; color: <?= $isSelected ? '#1D4ED8' : '#475569' ?>; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0;">
+                                                    <i class="bi bi-person-check-fill"></i>
+                                                </div>
+                                                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                                                    <span class="kpp-option-title" style="font-size: 13px; font-weight: 700; color: <?= $isSelected ? '#1D4ED8' : '#1E293B' ?>; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= $displayName ?></span>
+                                                    <span style="font-size: 11.5px; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($jabatanText) ?></span>
+                                                </div>
                                             </div>
-                                            <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
-                                                <span class="kpp-option-title" style="font-size: 13px; font-weight: 700; color: <?= $isSelected ? '#1D4ED8' : '#1E293B' ?>; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= $displayName ?></span>
-                                                <span style="font-size: 11.5px; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($jabatanText) ?></span>
+                                            <div style="margin-left: 8px; flex-shrink: 0;">
+                                                <i class="bi bi-check-circle-fill check-icon" style="<?= $isSelected ? 'display: block;' : 'display: none;' ?> color: #2563EB; font-size: 16px;"></i>
                                             </div>
                                         </div>
-                                        <div style="margin-left: 8px; flex-shrink: 0;">
-                                            <i class="bi bi-check-circle-fill check-icon" style="<?= $isSelected ? 'display: block;' : 'display: none;' ?> color: #2563EB; font-size: 16px;"></i>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        </div>
 
         <!-- ========================================================================= -->
-        <!-- BAGIAN 2: UPLOAD BERKAS LAMPIRAN (OPSIONAL) -->
+        <!-- BAGIAN 2: UPLOAD BERKAS LAMPIRAN -->
         <!-- ========================================================================= -->
         <div id="bagian2Card" class="card-panel-variant" style="border: 2px solid #FCA5A5; background: #FFFFFF; border-radius: 18px; padding: 28px; box-shadow: 0 4px 16px rgba(220, 38, 38, 0.05); position: relative; z-index: 10;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 2px dashed #FEE2E2;">
@@ -612,10 +641,7 @@ if ($isEdit) {
         </div>
 
         <!-- Action Bar Floating Card -->
-        <div class="card-panel-variant" style="border-radius: 16px; padding: 18px 24px; background: #FFFFFF; border: 1.5px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            </div>
-
+        <div class="card-panel-variant" style="border-radius: 16px; padding: 18px 24px; background: #FFFFFF; border: 1.5px solid #E2E8F0; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 14px;">
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <a href="<?= $isEdit ? (BASE_URL . '/surat/revisi') : (BASE_URL . '/dashboard') ?>" class="btn-btn btn-btn-secondary">Batal</a>
                 
@@ -625,7 +651,7 @@ if ($isEdit) {
             </div>
         </div>
 
-        <input type="hidden" name="gdrive_web_link" id="inGdriveWebLink" value="">
+        <input type="hidden" name="gdrive_web_link" id="inGdriveWebLink" value="<?= htmlspecialchars($valGDriveLink) ?>">
     </form>
 </div>
 
@@ -661,7 +687,7 @@ if ($isEdit) {
 
             <div style="background: #F8FAFC; border: 1.5px dashed #16A34A; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                 <div style="border: 2px solid #000; padding: 6px; background: #FFF; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;">
-                    <img id="modalQrPreviewImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fdrive.google.com" style="width: 128px; height: 128px; object-fit: contain;" alt="QR Code Preview">
+                    <img id="modalQrPreviewImg" src="<?= BASE_URL ?>/assets/img/barcode_placeholder.png" style="width: 128px; height: 128px; object-fit: contain;" alt="Barcode Preview">
                 </div>
                 <div id="modalQrStatusText" style="font-size: 12.5px; font-weight: 800; color: #15803D; display: flex; align-items: center; gap: 6px;">
                     <i class="bi bi-patch-check-fill" style="font-size: 16px;"></i> VERIFIED DIGITAL QR GOOGLE DRIVE
@@ -683,20 +709,20 @@ if ($isEdit) {
 
 <!-- Modal Review Container (Preview Surat Nota Dinas) -->
 <div id="reviewNotaDinasModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 16px; overflow-y: auto;">
-    <div style="background: #FFFFFF; width: 98vw; max-width: 900px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 95vh; border: 1px solid #BFDBFE;">
+    <div style="background: #FFFFFF; width: 98vw; max-width: 1000px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 95vh; border: 1px solid #BFDBFE;">
         <div style="padding: 16px 24px; background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-bottom: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
             <div style="display: flex; align-items: center; gap: 14px;">
                 <div style="width: 44px; height: 44px; border-radius: 12px; background: #FFFFFF; color: #1D4ED8; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15); border: 1px solid #BFDBFE;">
                     <i class="bi bi-file-earmark-check-fill"></i>
                 </div>
                 <div>
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #1E3A8A; letter-spacing: -0.2px;">Review &amp; Konfirmasi Dokumen Surat Nota Dinas</h3>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #1E3A8A; letter-spacing: -0.2px;">Review &amp; Konfirmasi Dokumen Surat Cuti</h3>
                 </div>
             </div>
         </div>
 
         <div style="padding: 20px 24px; overflow-y: auto; background: #F8FAFC; flex: 1; display: flex; flex-direction: column; gap: 20px;">
-            <div class="a4-paper-preview" style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 3cm; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #000000; position: relative; width: 210mm; max-width: 100%; min-height: 270mm; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; border-radius: 4px;">
+            <div class="a4-paper-preview" style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 3cm; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; position: relative; width: 210mm; max-width: 100%; min-height: 270mm; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; border-radius: 4px;">
                 <div>
                     <!-- Logo Top Left -->
                     <div style="margin-bottom: 10px;">
@@ -704,18 +730,18 @@ if ($isEdit) {
                     </div>
 
                     <!-- Title Centered -->
-                    <div style="text-align: center; margin-bottom: 10px;">
-                        <h2 style="font-size: 16px; font-weight: normal; letter-spacing: normal; margin: 0; color: #000000; text-transform: uppercase; text-decoration: underline;">NOTA DINAS</h2>
-                        <div style="font-size: 12.5px; color: #111111; margin-top: 3px;">Nomor : <span id="pvNomorSurat"></span></div>
+                    <div style="text-align: center; margin-bottom: 10px; line-height: 1.1;">
+                        <h2 style="font-size: 12px; font-weight: normal; letter-spacing: 0.5px; margin: 0; color: #000000; text-transform: uppercase; text-decoration: underline; text-decoration-color: #64748B; -webkit-text-decoration-color: #64748B; line-height: 1.1; display: inline-block;">NOTA DINAS</h2>
+                        <div style="font-size: 10px; color: #111111; margin-top: 0px; line-height: 1.1;">Nomor : <span id="pvNomorSurat"></span></div>
                     </div>
 
                     <!-- Metadata Table -->
-                    <table style="width: 100%; border-collapse: collapse; font-size: 12.5px; line-height: 1.15; margin-bottom: 6px; color: #000000;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.15; margin-bottom: 6px; color: #000000;">
                         <tr>
                             <td style="width: 100px; vertical-align: top; padding: 1.5px 0;">Kepada Yth.</td>
                             <td style="width: 12px; vertical-align: top; padding: 1.5px 0;">:</td>
                             <td style="vertical-align: top; padding: 1.5px 0;">
-                                <span id="pvKepada" style="font-weight: 500;">Kepala TVRI Stasiun Jawa Timur</span>
+                                <span id="pvKepada" style="font-weight: normal;">Kepala TVRI Stasiun Jawa Timur</span>
                             </td>
                         </tr>
                         <tr>
@@ -726,8 +752,8 @@ if ($isEdit) {
                         <tr>
                             <td style="vertical-align: top; padding: 1.5px 0;">Hal</td>
                             <td style="vertical-align: top; padding: 1.5px 0;">:</td>
-                            <td style="vertical-align: top; padding: 1.5px 0; font-weight: 500;">
-                                <span id="pvHal">Permohonan Cuti Tahunan</span>
+                            <td style="vertical-align: top; padding: 1.5px 0; font-weight: normal;">
+                                <span id="pvHal"><?= htmlspecialchars($valPerihal) ?></span>
                             </td>
                         </tr>
                         <tr>
@@ -738,7 +764,7 @@ if ($isEdit) {
                         <tr>
                             <td style="vertical-align: top; padding: 1.5px 0;">Lampiran</td>
                             <td style="vertical-align: top; padding: 1.5px 0;">:</td>
-                            <td id="pvLampiran" style="vertical-align: top; padding: 1.5px 0;">1 (lembar)</td>
+                            <td id="pvLampiran" style="vertical-align: top; padding: 1.5px 0;"><?= htmlspecialchars($valLampiran) ?></td>
                         </tr>
                         <tr>
                             <td style="width: 100px; vertical-align: top; padding: 1.5px 0;">Tanggal</td>
@@ -747,66 +773,95 @@ if ($isEdit) {
                         </tr>
                     </table>
 
-                    <div style="border-top: 1.5px solid #000000; margin: 6px 0 8px 0;"></div>
-                    <div style="font-size: 12.5px; color: #000000; margin-bottom: 4px; line-height: 1.15;">Dengan Hormat,</div>
+                    <div style="border-top: 1.5px solid #64748B; margin: 6px 0 8px 0;"></div>
+                    <div style="font-size: 10px; color: #000000; margin-bottom: 4px; line-height: 1.15;">Dengan Hormat,</div>
                     
-                    <div style="font-size: 12.5px; color: #000000; margin-bottom: 4px; line-height: 1.15;">Saya yang Bertandatangan di bawah ini :</div>
+                    <div style="font-size: 10px; color: #000000; margin-bottom: 4px; line-height: 1.15;">Saya yang Bertandatangan di bawah ini :</div>
                     
                     <!-- Section Pemohon Detail Table -->
-                    <table style="width: 100%; border-collapse: collapse; font-size: 12.5px; line-height: 1.15; margin-left: 15px; margin-bottom: 8px; color: #000000;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.15; margin-left: 15px; margin-bottom: 8px; color: #000000;">
                         <tr>
                             <td style="width: 100px; vertical-align: top; padding: 1.5px 0;">Nama</td>
                             <td style="width: 12px; vertical-align: top; padding: 1.5px 0;">:</td>
-                            <td id="pvNamaPemohon" style="vertical-align: top; padding: 1.5px 0;">Bagus Mahendra Putra</td>
+                            <td id="pvNamaPemohon" style="vertical-align: top; padding: 1.5px 0;"><?= htmlspecialchars($valPemohonNama) ?></td>
                         </tr>
                         <tr>
                             <td style="vertical-align: top; padding: 1.5px 0;">NOPEG</td>
                             <td style="vertical-align: top; padding: 1.5px 0;">:</td>
-                            <td id="pvNopegPemohon" style="vertical-align: top; padding: 1.5px 0;">202205 29091996</td>
+                            <td id="pvNopegPemohon" style="vertical-align: top; padding: 1.5px 0;"><?= htmlspecialchars($valPemohonNopeg) ?></td>
                         </tr>
                         <tr>
                             <td style="vertical-align: top; padding: 1.5px 0;">Jabatan</td>
                             <td style="vertical-align: top; padding: 1.5px 0;">:</td>
-                            <td id="pvJabatanPemohon" style="vertical-align: top; padding: 1.5px 0;">Staf Umum/Pengemudi</td>
+                            <td id="pvJabatanPemohon" style="vertical-align: top; padding: 1.5px 0;"><?= htmlspecialchars($valPemohonJabatan) ?></td>
                         </tr>
                         <tr>
                             <td style="vertical-align: top; padding: 1.5px 0;">Nomor HP.</td>
                             <td style="vertical-align: top; padding: 1.5px 0;">:</td>
-                            <td id="pvHpPemohon" style="vertical-align: top; padding: 1.5px 0;">0856-4582-3054</td>
+                            <td id="pvHpPemohon" style="vertical-align: top; padding: 1.5px 0;"><?= htmlspecialchars($valPemohonHp) ?></td>
                         </tr>
                     </table>
 
-                    <div id="pvIsiSurat" style="line-height: 1.15; text-align: justify; font-size: 12.5px; font-family: Arial, sans-serif; color: #000000; margin-bottom: 8px; white-space: pre-line;"></div>
-                    <div id="pvPenutupSurat" style="line-height: 1.15; text-align: justify; font-size: 12.5px; font-family: Arial, sans-serif; color: #000000; margin-bottom: 10px; white-space: pre-line;"></div>
+                    <div id="pvIsiSurat" style="line-height: 1.15; text-align: justify; font-size: 10px; font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; margin-bottom: 8px; white-space: pre-line;"></div>
+                    <div id="pvPenutupSurat" style="line-height: 1.15; text-align: justify; font-size: 10px; font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; margin-bottom: 12px; white-space: pre-line;"></div>
 
                     <!-- Signature Block (2 columns: Left for TU default, Right for Hormat Saya / Pemohon) -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 10px; margin-bottom: 10px;">
-                        <!-- Left Column: Kepala Sub Bagian Tata Usaha -->
-                        <div style="width: 250px; text-align: left; font-size: 12px; line-height: 1.15; color: #000000;">
-                            <div>Kepala Sub Bagian Tata Usaha</div>
-                            <div>TVRI Stasiun Jawa Timur</div>
-                            <div style="height: 35px; margin: 3px 0;"></div>
-                            <div style="text-decoration: underline;"><?= htmlspecialchars($tuNama) ?></div>
-                            <div><?= htmlspecialchars($tuNip) ?></div>
+                    <div style="margin-top: 54px; margin-bottom: 10px;">
+                        <!-- Row 1: Header / Jabatan -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <!-- Left: Kepala Sub Bagian Tata Usaha -->
+                            <div style="width: 250px; text-align: left; font-size: 10px; line-height: 1.15; color: #000000;">
+                                <div>Kepala Sub Bagian Tata Usaha</div>
+                                <div>TVRI Stasiun Jawa Timur</div>
+                            </div>
+                            <!-- Right: Hormat Saya (Pemohon) -->
+                            <div style="width: 230px; text-align: center; font-size: 10px; line-height: 1.15; color: #000000;">
+                                <div>Hormat Saya,</div>
+                                <div>&nbsp;</div>
+                            </div>
                         </div>
 
-                        <!-- Right Column: Hormat Saya (Pemohon) -->
-                        <div style="width: 230px; text-align: center; font-size: 12px; line-height: 1.15; color: #000000;">
-                            <div>Hormat Saya,</div>
-                            <div style="min-height: 35px; margin: 3px 0; display: flex; align-items: center; justify-content: center;">
-                                <img id="pvPTtdImg" src="" style="max-height: 35px; object-fit: contain; display: none;">
-                                <div id="pvPTtdPlaceholder" style="height: 35px;"></div>
+                        <!-- Row 2: TTD Space -->
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="width: 250px; height: 35px; margin: 3px 0;"></div>
+                            <div style="width: 230px; height: 35px; min-height: 35px; margin: 3px 0; display: flex; align-items: center; justify-content: center;">
+                                <img id="pvPTtdImg" src="<?= $hasPemohonSig ? getImgUrl(makeSignatureBlue($existingPemohonSig)) : '' ?>" style="max-height: 35px; object-fit: contain; <?= $hasPemohonSig ? 'display: block;' : 'display: none;' ?>">
+                                <div id="pvPTtdPlaceholder" style="height: 35px; <?= $hasPemohonSig ? 'display: none;' : '' ?>"></div>
                             </div>
-                            <div id="pvPNamaPenandatangan">Bagus Mahendra Putra</div>
+                        </div>
+
+                        <!-- Row 3: Nama & NIP (Sejajar) -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="width: 250px; text-align: left; font-size: 10px; line-height: 1.15; color: #000000;">
+                                <div style="position: relative; display: inline-block;">
+                                    <div><span style="font-weight: normal; border-bottom: 0.5pt solid #64748B; padding-bottom: 1px; display: inline-block; white-space: nowrap;"><?= htmlspecialchars($tuNama) ?></span></div>
+                                    <div style="white-space: nowrap;"><?= htmlspecialchars($tuNip) ?></div>
+                                </div>
+                            </div>
+                            <div style="width: 230px; text-align: center; font-size: 10px; line-height: 1.15; color: #000000;">
+                                <div style="position: relative; display: inline-block;">
+                                    <div><span id="pvPNamaPenandatangan" style="font-weight: normal; border-bottom: 0.5pt solid #64748B; padding-bottom: 1px; display: inline-block; white-space: nowrap;"><?= htmlspecialchars($valPemohonNama) ?></span></div>
+                                    <div id="pvPNipPenandatangan" style="white-space: nowrap;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Footer -->
-                <div style="padding-top: 12px; border-top: 1px solid #E2E8F0;">
-                    <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px; font-size: 9px; color: #333333; line-height: 1.35;">
-                        <div>
-                            <strong>LEMBAGA PENYIARAN PUBLIK</strong><br>
+                <div style="padding-top: 12px;">
+                    <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 58px; height: 58px; border: 1.5px solid #000000; background: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; padding: 2px; pointer-events: none; user-select: none;" id="pvBarcodeContainer" title="Barcode">
+                                <img id="pvBarcodeImg" src="<?= BASE_URL ?>/assets/img/barcode_placeholder.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Barcode">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid #CBD5E1; padding-top: 8px;">
+                        <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px; font-size: 7.5px; color: #333333; line-height: 1.3;">
+                        <div style="color: #0052CC;">
+                            LEMBAGA PENYIARAN PUBLIK<br>
                             TELEVISI REPUBLIK INDONESIA<br>
                             STASIUN JAWA TIMUR
                         </div>
@@ -815,7 +870,7 @@ if ($isEdit) {
                             Surabaya, Jawa Timur, 60189<br>
                             Indonesia
                         </div>
-                        <div>
+                        <div style="color: #0052CC;">
                             P (031) 567452 5678298<br>
                             F (031) 5678452 5616774<br>
                             www.tvri.go.id
@@ -823,15 +878,16 @@ if ($isEdit) {
                     </div>
                 </div>
             </div>
+            </div> <!-- CLOSING .a4-paper-preview -->
 
             <!-- ROW 2: DOKUMEN PDF LAMPIRAN -->
             <div id="pvPdfPreviewWrapper" style="width: 100%; display: none; margin-top: 10px; padding-top: 24px; border-top: 2px dashed #CBD5E1;">
-                <div id="pvPdfListContainer" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 20px; align-items: stretch; width: 100%;"></div>
+                <div id="pvPdfListContainer" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 20px; align-items: stretch; justify-content: flex-start; width: 100%;"></div>
             </div>
-        </div>
+        </div> <!-- CLOSING Modal Body -->
 
         <!-- Modal Bottom Bar Actions -->
-        <div class="review-modal-footer" style="padding: 16px 24px; background: #FFFFFF; border-top: 1px solid #E2E8F0; gap: 12px; box-shadow: 0 -4px 12px rgba(0,0,0,0.03);">
+        <div class="review-modal-footer" style="padding: 16px 24px; background: #FFFFFF; border-top: 1px solid #E2E8F0; gap: 12px; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); flex-shrink: 0; position: relative; z-index: 10;">
             <div class="review-footer-left">
                 <button type="button" onclick="printNotaDinasDocument()" class="btn-btn btn-review-print" style="background: #FFFFFF; color: #1E293B; border: 1.5px solid #CBD5E1; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px;">
                     <i class="bi bi-printer-fill" style="color: #2563EB; font-size: 16px;"></i> Print Surat
@@ -844,30 +900,10 @@ if ($isEdit) {
                 </button>
             </div>
         </div>
-    </div>
-</div>
+    </div> <!-- CLOSING Modal Card Container -->
+</div> <!-- CLOSING #reviewNotaDinasModal -->
 
 <!-- Modal TTD Digital Pemohon -->
-<!-- ================================================== -->
-<!-- MODAL NOTIFIKASI PERINGATAN PENANDATANGAN BELUM DIISI -->
-<!-- ================================================== -->
-<div id="penandatanganWarningNotificationModal" style="display: none; position: fixed; inset: 0; z-index: 10010; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #FFFFFF; width: 100%; max-width: 460px; border-radius: 20px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); text-align: center; position: relative;">
-        <div style="width: 64px; height: 64px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 16px; border: 2px solid #FCA5A5;">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-        </div>
-        <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; color: #991B1B;">Penandatangan Surat Belum Dipilih!</h3>
-        <p style="margin: 0 0 24px 0; font-size: 13.5px; color: #64748B; line-height: 1.5;">
-            Anda belum memilih <strong>KPP Bidang Penandatangan Surat</strong>. Silakan pilih penandatangan surat terlebih dahulu sebelum melakukan konfirmasi dan mengirim dokumen.
-        </p>
-        <div style="display: flex; gap: 12px; justify-content: center;">
-            <button type="button" onclick="closePenandatanganWarningModal()" class="btn-btn btn-btn-secondary" style="flex: 1; justify-content: center; font-weight: 600;">Tutup</button>
-            <button type="button" onclick="goToFillPenandatangan()" class="btn-btn btn-btn-primary" style="flex: 1.4; justify-content: center; background-color: #2563EB; border-color: #2563EB; font-weight: 700;">
-                <i class="bi bi-person-check-fill"></i> Pilih Penandatangan
-            </button>
-        </div>
-    </div>
-</div>
 
 <!-- Modal TTD Digital Pemohon -->
 <div id="signatureModalPopup" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px;">
@@ -904,6 +940,27 @@ if ($isEdit) {
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================== -->
+<!-- MODAL NOTIFIKASI PERINGATAN PENANDATANGAN BELUM DIISI -->
+<!-- ================================================== -->
+<div id="penandatanganWarningNotificationModal" style="display: none; position: fixed; inset: 0; z-index: 10010; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; width: 100%; max-width: 460px; border-radius: 20px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); text-align: center; position: relative;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 16px; border: 2px solid #FCA5A5;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; color: #991B1B;">Penandatangan Surat Belum Dipilih!</h3>
+        <p style="margin: 0 0 24px 0; font-size: 13.5px; color: #64748B; line-height: 1.5;">
+            Anda belum memilih <strong>KPP Bidang Penandatangan Surat</strong>. Silakan pilih penandatangan surat terlebih dahulu sebelum melakukan konfirmasi dan mengirim dokumen.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <button type="button" onclick="closePenandatanganWarningModal()" class="btn-btn btn-btn-secondary" style="flex: 1; justify-content: center; font-weight: 600;">Tutup</button>
+            <button type="button" onclick="goToFillPenandatangan()" class="btn-btn btn-btn-primary" style="flex: 1.5; justify-content: center; font-weight: 600; background: #2563EB;">
+                <i class="bi bi-person-check-fill"></i> Pilih KPP Bidang
+            </button>
         </div>
     </div>
 </div>
@@ -1130,6 +1187,19 @@ function openReviewModal(showModal = true) {
     if (document.getElementById('pvHpPemohon')) document.getElementById('pvHpPemohon').textContent = hpP;
     if (document.getElementById('pvPNamaPenandatangan')) document.getElementById('pvPNamaPenandatangan').textContent = namaP;
 
+    // Sync NIP Pemohon for signature block
+    const nipContainer = document.getElementById('pvPNipPenandatangan');
+    if (nipContainer) {
+        const nopegVal = (nopegP || '').trim();
+        if (nopegVal) {
+            nipContainer.textContent = nopegVal.toUpperCase().startsWith('NIP') ? nopegVal : ('NIP. ' + nopegVal);
+            nipContainer.style.display = 'block';
+        } else {
+            nipContainer.textContent = '';
+            nipContainer.style.display = 'none';
+        }
+    }
+
     // Sync TTD Pemohon preview
     const sigValP = document.getElementById('pemohonSignatureData') ? document.getElementById('pemohonSignatureData').value : '';
     const pvTtdImgP = document.getElementById('pvPTtdImg');
@@ -1153,6 +1223,11 @@ function openReviewModal(showModal = true) {
         if (uploadedPdfs.length > 0) {
             pdfWrapper.style.display = 'block';
             let pdfsHtml = '';
+            let totalLampiranPages = 0;
+            uploadedPdfs.forEach(item => {
+                totalLampiranPages += (item.pageCount || 1);
+            });
+
             uploadedPdfs.forEach((pdfItem, index) => {
                 const pageCount = pdfItem.pageCount || 1;
                 for (let p = 1; p <= pageCount; p++) {
@@ -1164,9 +1239,10 @@ function openReviewModal(showModal = true) {
                     const imgSrc = hasRendered ? pdfItem.renderedPages[p] : '';
                     const imgStyle = hasRendered ? 'display: block;' : 'display: none;';
                     const canvasStyle = hasRendered ? 'display: none;' : 'display: block;';
+                    const singleColStyle = '';
 
                     pdfsHtml += `
-                    <div class="pdf-lampiran-wrapper-col">
+                    <div class="pdf-lampiran-wrapper-col" style="${singleColStyle}">
                         <div style="padding: 10px 14px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;" class="no-print">
                             <div style="display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden;">
                                 <i class="bi bi-file-earmark-pdf-fill" style="color: #DC2626; font-size: 22px; flex-shrink: 0;"></i>
@@ -1180,7 +1256,7 @@ function openReviewModal(showModal = true) {
                             </div>
                         </div>
 
-                        <div class="pdf-lampiran-card-preview" style="background: #FFFFFF; border: none; padding: 0 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #000000; position: relative; aspect-ratio: 210 / 297; min-height: 0; margin: 0 auto; box-sizing: border-box; border-radius: 4px; width: 100%; overflow: hidden;">
+                        <div class="pdf-lampiran-card-preview" style="background: #FFFFFF; border: none; padding: 0 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; position: relative; aspect-ratio: 210 / 297; min-height: 0; margin: 0 auto; box-sizing: border-box; border-radius: 4px; width: 100%; overflow: hidden;">
                             <canvas id="pdfCanvas_${pdfItem.id}_${p}" class="pdf-canvas-item" style="width: 100%; height: auto; object-fit: contain; ${canvasStyle} background: #FFFFFF; border: none; margin: 0; padding: 0;"></canvas>
                             <img id="pdfImg_${pdfItem.id}_${p}" class="pdf-img-item" src="${imgSrc}" style="width: 100%; height: auto; object-fit: contain; ${imgStyle} margin: 0 auto; border: none; padding: 0;">
                         </div>
@@ -1715,9 +1791,10 @@ function printReviewModal(modalId) {
             <title></title>
             <base href="<?= (defined('BASE_URL') ? BASE_URL : '') ?>/">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+            <link rel="stylesheet" href="<?= (defined('BASE_URL') ? BASE_URL : '') ?>/assets/css/gotham-font.css">
             <style>
                 @page { size: A4 portrait; margin: 0; }
-                html, body { font-family: Arial, sans-serif; background: #ffffff; color: #000000; margin: 0 !important; padding: 0 !important; width: 210mm !important; height: auto !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                html, body { font-family: 'Gotham Light', 'Gotham', sans-serif; background: #ffffff; color: #000000; margin: 0 !important; padding: 0 !important; width: 210mm !important; height: auto !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                 img { max-width: 100% !important; display: inline-block !important; visibility: visible !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                 .printable-a4-page { background: #FFFFFF !important; border: none !important; box-shadow: none !important; padding: 3cm !important; margin: 0 auto !important; width: 210mm !important; height: 297mm !important; max-height: 297mm !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; overflow: hidden !important; }
                 .printable-a4-page.printable-lampiran-page { padding: 0 !important; border: none !important; box-shadow: none !important; overflow: hidden !important; width: 210mm !important; height: 297mm !important; background: #ffffff !important; display: block !important; }
@@ -1782,10 +1859,9 @@ function updateLiveBarcodePreview(url) {
             linkPreview.innerText = trimmed;
             linkPreview.style.color = '#15803D';
         } else {
-            const defaultUrl = 'https://drive.google.com';
-            img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(defaultUrl);
-            statusText.innerHTML = '<i class="bi bi-info-circle-fill" style="font-size: 16px; color: #EAB308;"></i> SIAP GENERATE BARCODE';
-            linkPreview.innerText = 'Silakan paste / tempel URL Google Drive di atas';
+            img.src = '<?= BASE_URL ?>/assets/img/barcode_placeholder.png';
+            statusText.innerHTML = '<i class="bi bi-info-circle-fill" style="font-size: 16px; color: #64748B;"></i> BARCODE BELUM AKTIF';
+            linkPreview.innerText = 'Barcode aktif otomatis setelah surat terupload ke Google Drive';
             linkPreview.style.color = '#64748B';
         }
     }
@@ -1841,8 +1917,11 @@ function saveBarcodeFromModal() {
 function updateReviewBarcodePreview(url) {
     const pvBarcodeImg = document.getElementById('pvBarcodeImg');
     if (pvBarcodeImg) {
-        const targetUrl = url || 'https://drive.google.com';
-        pvBarcodeImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(targetUrl);
+        if (url && url !== 'https://drive.google.com' && url !== '#') {
+            pvBarcodeImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(url);
+        } else {
+            pvBarcodeImg.src = '<?= BASE_URL ?>/assets/img/barcode_placeholder.png';
+        }
     }
 }
 
@@ -1856,6 +1935,9 @@ function submitFormFromReview() {
     if (!kppSelect || !kppSelect.value) {
         showPenandatanganWarningModal();
         return;
+    }
+    if (window.TvriAutocomplete && typeof window.TvriAutocomplete.saveAll === 'function') {
+        window.TvriAutocomplete.saveAll();
     }
     closeReviewModal();
     document.body.style.overflow = '';
@@ -1926,7 +2008,7 @@ function startDrawingModal(e) {
     lastY = coords.y;
 
     if (modalCtx) {
-        modalCtx.strokeStyle = '#000000';
+        modalCtx.strokeStyle = '#1E3A8A';
         modalCtx.lineWidth = 3.2;
         modalCtx.lineCap = 'round';
         modalCtx.lineJoin = 'round';
@@ -1944,7 +2026,7 @@ function drawModal(e) {
     e.preventDefault();
     const coords = getCanvasCoords(e);
 
-    modalCtx.strokeStyle = '#000000';
+    modalCtx.strokeStyle = '#1E3A8A';
     modalCtx.lineWidth = 3.2;
     modalCtx.lineCap = 'round';
     modalCtx.lineJoin = 'round';
@@ -1981,7 +2063,7 @@ function openSignatureModal() {
     setupModalCanvasDpi();
 
     modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
-    modalCtx.strokeStyle = '#000000';
+    modalCtx.strokeStyle = '#1E3A8A';
     modalCtx.lineWidth = 5.5;
     modalCtx.lineCap = 'round';
     modalCtx.lineJoin = 'round';
@@ -2147,5 +2229,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    const initGDriveLink = <?= json_encode($valGDriveLink) ?>;
+    if (initGDriveLink) {
+        updateReviewBarcodePreview(initGDriveLink);
+    }
 });
 </script>
+<script src="<?= BASE_URL ?>/assets/js/input-autocomplete-history.js"></script>

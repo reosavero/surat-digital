@@ -23,25 +23,30 @@ $isEdit = !empty($surat);
 $meta = $surat['meta'] ?? [];
 $catatanRevisi = $meta['catatan_revisi'] ?? '';
 
-$valPerihalPermohonan = $isEdit ? ($meta['perihal_permohonan'] ?? $surat['perihal']) : 'Permohonan Hunting Produksi';
+$valPerihalPermohonan = $isEdit ? ($meta['perihal_permohonan'] ?? $surat['perihal']) : '';
 $valTanggalPermohonan = $isEdit ? $surat['tanggal_surat'] : date('Y-m-d');
-$valPembukaPermohonan = $isEdit ? ($meta['pembuka_surat'] ?? 'Sehubungan dengan adanya permintaan kerjasama dari bidang PU dan Promo, maka kami mengajukan permohonan produksi acara sebagai berikut :') : 'Sehubungan dengan adanya permintaan kerjasama dari bidang PU dan Promo, maka kami mengajukan permohonan produksi acara sebagai berikut :';
-$valMataAcara = $isEdit ? ($meta['mata_acara'] ?? 'Hunting') : 'Hunting';
-$valLokasiSyuting = $isEdit ? ($meta['lokasi_syuting'] ?? 'Mojokerto') : 'Mojokerto';
-$valNamaProgram = $isEdit ? ($meta['nama_program'] ?? 'Hunting Company Profile') : 'Hunting Company Profile';
-$valTanggalMulai = $isEdit ? ($meta['tanggal_mulai'] ?? '17 September 2026') : '17 September 2026';
-$valPaket = $isEdit ? ($meta['paket'] ?? '-') : '-';
-$valTglSiaran = $isEdit ? ($meta['tgl_siaran'] ?? 'Menyesuaikan Pola') : 'Menyesuaikan Pola';
-$valSumberBiaya = $isEdit ? ($meta['sumber_biaya'] ?? 'PNBP') : 'PNBP';
+$valPembukaPermohonan = $isEdit ? ($meta['pembuka_surat'] ?? '') : '';
+$valMataAcara = $isEdit ? ($meta['mata_acara'] ?? '') : '';
+$valLokasiSyuting = $isEdit ? ($meta['lokasi_syuting'] ?? '') : '';
+$valNamaProgram = $isEdit ? ($meta['nama_program'] ?? '') : '';
+$valTanggalMulai = $isEdit ? ($meta['tanggal_mulai'] ?? '') : '';
+$valTglHunting = $isEdit ? ($meta['tgl_hunting'] ?? '') : '';
+$isTglHuntingActive = $isEdit ? (!empty($meta['is_tgl_hunting']) || (!empty($valTglHunting) && trim($valTglHunting) !== '')) : false;
+$valPaket = $isEdit ? ($meta['paket'] ?? '') : '';
+$valTglSiaran = $isEdit ? ($meta['tgl_siaran'] ?? '') : '';
+$valSumberBiaya = $isEdit ? ($meta['sumber_biaya'] ?? '') : '';
+$valIsDetailAcara = $isEdit ? (!empty($meta['is_detail_acara']) && (string)$meta['is_detail_acara'] !== '0') : false;
+$valHasSuratTugas = $isEdit ? (!empty($meta['has_surat_tugas']) && (string)$meta['has_surat_tugas'] !== '0') : false;
+$valIsTable = $isEdit ? (!empty($meta['kru_table_json']) && !empty($savedKruData['rows'])) : false;
 $valKppUserId = $isEdit ? ($surat['kpp_user_id'] ?? '') : '';
 
 $valNomorSurat = $isEdit ? ($surat['nomor_surat'] ?? '') : '';
-$valPerihalDinas = $isEdit ? $surat['perihal'] : 'Permohonan Hunting Produksi';
+$valPerihalDinas = $isEdit ? $surat['perihal'] : '';
 $valSifatDinas = $isEdit ? ($meta['sifat_surat'] ?? 'Biasa') : 'Biasa';
-$valLampiranDinas = $isEdit ? $surat['lampiran'] : '3 (tiga)';
+$valLampiranDinas = $isEdit ? $surat['lampiran'] : '';
 $valTanggalDinas = $isEdit ? $surat['tanggal_surat'] : date('Y-m-d');
-$valIsiDinas = $isEdit ? ($meta['isi_surat_dinas'] ?? $surat['isi_surat']) : "Sehubungan dengan permohonan izin produksi dari Ketua Perencana dan Pengendalian Teknik TVRI Stasiun Jawa Timur, bersama ini kami sampaikan permohonan hunting produksi dan penyiaran program sebagaimana terlampir.\n\nDemikian permohonan ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.";
-$valPenutupDinas = $isEdit ? ($meta['penutup_surat'] ?? 'Demikian permohonan ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.') : 'Demikian permohonan ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.';
+$valIsiDinas = $isEdit ? ($meta['isi_surat_dinas'] ?? $surat['isi_surat']) : '';
+$valPenutupDinas = $isEdit ? ($meta['penutup_surat'] ?? '') : '';
 $valGDriveLink = $isEdit ? ($surat['gdrive_web_link'] ?? '') : '';
 
 $existingPdfs = [];
@@ -313,22 +318,23 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
 .kru-interactive-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Gotham Light', 'Gotham', sans-serif;
     font-size: 12px;
-    border: 1px solid #000000;
+    border: 1px solid #64748B;
     table-layout: fixed;
     background: #FFFFFF;
 }
 .kru-interactive-table th,
 .kru-interactive-table td {
-    border: 1px solid #000000;
+    border: 1px solid #64748B;
     box-sizing: border-box;
     position: relative;
 }
 .kru-interactive-table th {
     background: #FAF5FF;
     color: #0F172A;
-    font-weight: 700;
+    font-weight: 600;
+    font-family: 'Gotham Light', 'Gotham', sans-serif !important;
     padding: 6px 4px;
     vertical-align: middle;
 }
@@ -370,7 +376,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
     background: transparent;
     padding: 3px 6px;
     font-size: 11.5px;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Gotham Light', 'Gotham', sans-serif;
     color: #000000;
     box-sizing: border-box;
     border-radius: 4px;
@@ -389,7 +395,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
     padding: 3px 4px;
     font-size: 11.5px;
     font-weight: 800;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Gotham Light', 'Gotham', sans-serif;
     text-transform: uppercase;
     color: #000000;
     box-sizing: border-box;
@@ -408,7 +414,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
     <div class="page-header-banner" style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <h1 style="font-size: 22px; font-weight: 800; color: var(--text-heading); margin: 0; display: flex; align-items: center; gap: 10px;">
-                <i class="bi bi-camera-reels-fill" style="color: #7E22CE;"></i> <?= $isEdit ? 'Revisi Surat Izin Produksi' : 'Form Pembuatan Surat Izin Produksi' ?>
+                <i class="bi bi-file-earmark-text-fill" style="color: #7E22CE;"></i> <?= $isEdit ? 'Revisi Surat Nota Dinas' : 'Form Pembuatan Surat Nota Dinas' ?>
             </h1>
         </div>
     </div>
@@ -443,7 +449,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
     </div>
     <?php endif; ?>
 
-    <form id="formProduksi" action="<?= BASE_URL ?>/surat/store-produksi" method="POST" enctype="multipart/form-data" autocomplete="off" style="display: flex; flex-direction: column; gap: 28px;">
+    <form id="formProduksi" action="<?= BASE_URL ?>/surat/store-nota-dinas" method="POST" enctype="multipart/form-data" autocomplete="off" style="display: flex; flex-direction: column; gap: 28px;">
         <?= Session::csrfField() ?>
         <input type="hidden" name="kategori_surat" value="<?= $kategoriLabel ?>">
         <?php if ($isEdit): ?>
@@ -451,17 +457,105 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
         <?php endif; ?>
 
         <!-- ========================================================================= -->
-        <!-- BAGIAN 1: FORM SURAT PERMOHONAN IZIN PRODUKSI (BAGIAN ATAS) -->
+        <!-- BAGIAN 1: FORM SURAT NOTA DINAS (BAGIAN ATAS) -->
         <!-- ========================================================================= -->
-        <div id="bagian1Card" class="card-panel-variant" style="border: 2px solid #E9D5FF; background: #FFFFFF; border-radius: 18px; padding: 28px; box-shadow: 0 4px 16px rgba(126, 34, 206, 0.05); position: relative; z-index: 30;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px dashed #F3E8FF;">
+        <div id="bagian1Card" class="card-panel-variant" style="border: 2px solid #BFDBFE; background: #FFFFFF; border-radius: 18px; padding: 28px; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.05); position: relative; z-index: 20;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px dashed #DBEAFE;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #FAF5FF; color: #7E22CE; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #EFF6FF; color: #1D4ED8; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800;">
                         1
                     </div>
                     <div>
+                        <h2 style="font-size: 17px; font-weight: 800; color: #1E3A8A; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-building-fill-gear" style="color: #2563EB;"></i> BAGIAN 1: SURAT NOTA DINAS
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixed Defaults Hidden Inputs for Surat Dinas -->
+            <input type="hidden" name="kepada" id="inKepada" value="Kepala TVRI Stasiun Jawa Timur">
+            <input type="hidden" name="kepada_sub" id="inKepadaSub" value="TVRI Stasiun Jawa Timur">
+            <input type="hidden" name="dari" value="Kepala Sub Bagian Tata Usaha">
+            <input type="hidden" name="penandatangan_nama" value="<?= htmlspecialchars($tuNama) ?>">
+            <input type="hidden" name="penandatangan_nip" value="<?= htmlspecialchars($tuNip) ?>">
+            <input type="hidden" name="penandatangan_jabatan" value="Kepala Sub Bagian Tata Usaha TVRI Stasiun Jawa Timur">
+
+            <!-- Editable Inputs for Surat Dinas Produksi -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px;">
+                <div class="form-group-block">
+                    <label class="form-label-custom">Nomor Surat Nota Dinas</label>
+                    <input type="text" name="nomor_surat" id="inNomorSurat" value="<?= htmlspecialchars($valNomorSurat) ?>" class="form-input-custom">
+                </div>
+                <div class="form-group-block">
+                    <label class="form-label-custom">Hal / Perihal Nota Dinas</label>
+                    <input type="text" name="perihal" id="inHal" value="<?= htmlspecialchars($valPerihalDinas) ?>" required class="form-input-custom">
+                </div>
+                <div class="form-group-block">
+                    <label class="form-label-custom">Sifat Surat</label>
+                    <div class="input-wrapper" id="sifatSuratContainer" style="position: relative; width: 100%;">
+                        <input type="hidden" name="sifat_surat" id="inSifat" value="<?= htmlspecialchars($valSifatDinas) ?>" required>
+
+                        <button type="button" class="custom-select-trigger" id="sifatSuratDropdownTrigger" onclick="toggleSifatSuratMenu(event)" style="width: 100%; display: flex; align-items: center; justify-content: space-between; height: 46px; padding: 10px 16px; background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 12px; font-size: 14px; color: #1F2937; font-weight: 500; cursor: pointer; transition: all 0.2s ease; outline: none; position: relative;">
+                            <span id="sifatSuratSelectedText" style="color: #1F2937; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;"><?= htmlspecialchars($valSifatDinas) ?></span>
+                            <i class="bi bi-chevron-down" id="sifatSuratChevronIcon" style="font-size: 13px; color: #6B7280; transition: transform 0.2s ease;"></i>
+                        </button>
+
+                        <!-- Custom Positioned Dropdown Popup Menu for Selecting Sifat Surat -->
+                        <div id="sifatSuratDropdownMenu" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; width: 100%; z-index: 99999; background: #FFFFFF; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.05); border: 1.5px solid #005BAC; padding: 6px;">
+                            <div style="max-height: 250px; overflow-y: auto; padding-right: 2px;" id="sifatSuratOptionsList">
+                                <div class="custom-sifat-option-item" data-val="Biasa" onclick="selectSifatSuratOption('Biasa', this)" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease; margin-bottom: 2px;">
+                                    <span style="font-size: 13.5px; font-weight: 600; color: #1F2937;">Biasa</span>
+                                    <i class="bi bi-check2 check-icon-sifat" style="display: none; color: #005BAC; font-size: 18px; font-weight: 800;"></i>
+                                </div>
+                                <div class="custom-sifat-option-item" data-val="Segera" onclick="selectSifatSuratOption('Segera', this)" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease; margin-bottom: 2px;">
+                                    <span style="font-size: 13.5px; font-weight: 600; color: #1F2937;">Segera</span>
+                                    <i class="bi bi-check2 check-icon-sifat" style="display: none; color: #005BAC; font-size: 18px; font-weight: 800;"></i>
+                                </div>
+                                <div class="custom-sifat-option-item" data-val="Sangat Segera" onclick="selectSifatSuratOption('Sangat Segera', this)" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease; margin-bottom: 2px;">
+                                    <span style="font-size: 13.5px; font-weight: 600; color: #1F2937;">Sangat Segera</span>
+                                    <i class="bi bi-check2 check-icon-sifat" style="display: none; color: #005BAC; font-size: 18px; font-weight: 800;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
+                <div class="form-group-block">
+                    <label class="form-label-custom">Lampiran</label>
+                    <input type="text" name="lampiran" id="inLampiran" value="<?= htmlspecialchars($valLampiranDinas) ?>" required class="form-input-custom">
+                </div>
+                <div class="form-group-block">
+                    <label class="form-label-custom">Tanggal Nota Dinas</label>
+                    <div class="modern-datepicker-wrapper">
+                        <input type="text" name="tanggal_surat" id="inTanggal" value="<?= htmlspecialchars($valTanggalDinas) ?>" required class="form-input-custom modern-datepicker" placeholder="Pilih tanggal nota dinas...">
+                        <span class="datepicker-calendar-icon" title="Buka Kalender">
+                            <i class="bi bi-calendar2-event-fill"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group-block" style="margin-bottom: 10px;">
+                <label class="form-label-custom">Isi Surat Nota Dinas</label>
+                <textarea name="isi_surat" id="inIsiSurat" rows="6" class="form-input-custom" required><?= htmlspecialchars($valIsiDinas) ?></textarea>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- BAGIAN 2: FORM SURAT PERMOHONAN (BAGIAN BAWAH) -->
+        <!-- ========================================================================= -->
+        <div id="bagian2Card" class="card-panel-variant" style="border: 2px solid #E9D5FF; background: #FFFFFF; border-radius: 18px; padding: 28px; box-shadow: 0 4px 16px rgba(126, 34, 206, 0.05); position: relative; z-index: 10;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px dashed #F3E8FF;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #FAF5FF; color: #7E22CE; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800;">
+                        2
+                    </div>
+                    <div>
                         <h2 style="font-size: 17px; font-weight: 800; color: #581C87; margin: 0; display: flex; align-items: center; gap: 8px;">
-                            <i class="bi bi-file-earmark-text-fill" style="color: #7E22CE;"></i> BAGIAN 1: SURAT PERMOHONAN IZIN PRODUKSI
+                            <i class="bi bi-file-earmark-text-fill" style="color: #7E22CE;"></i> BAGIAN 2: SURAT PERMOHONAN
                         </h2>
                     </div>
                 </div>
@@ -492,8 +586,8 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
             </div>
 
             <!-- Detail Parameter Produksi Grid -->
-            <div id="detailAcaraCardBox" style="background: #FAF5FF; padding: 18px 20px; border-radius: var(--radius-md, 12px); border: 1px solid #E9D5FF; margin-bottom: 20px; transition: all 0.25s ease;">
-                <div id="detailAcaraHeaderBox" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; transition: all 0.25s ease;">
+            <div id="detailAcaraCardBox" style="background: #FAF5FF; padding: <?= $valIsDetailAcara ? '18px 20px' : '10px 18px' ?>; border-radius: var(--radius-md, 12px); border: 1px solid #E9D5FF; margin-bottom: 20px; transition: all 0.25s ease; width: auto; display: <?= $valIsDetailAcara ? 'block' : 'inline-block' ?>;">
+                <div id="detailAcaraHeaderBox" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: <?= $valIsDetailAcara ? '14px' : '0' ?>; transition: all 0.25s ease;">
                     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                         <div style="width: 38px; height: 38px; border-radius: 10px; background: #FFFFFF; color: #7E22CE; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #E9D5FF;">
                             <i class="bi bi-film"></i>
@@ -502,13 +596,14 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                         
                         <!-- Toggle Switch Button -->
                         <label class="table-switch-wrap" style="padding: 0; border: none; background: transparent; cursor: pointer; margin-left: 4px;">
-                            <input type="checkbox" id="detailAcaraToggleSwitch" class="table-switch-inp" checked onchange="toggleDetailAcaraState(this.checked)">
+                            <input type="checkbox" id="detailAcaraToggleSwitch" class="table-switch-inp" <?= $valIsDetailAcara ? 'checked' : '' ?> onchange="toggleDetailAcaraState(this.checked)">
                             <span class="table-switch-slider"></span>
                         </label>
+                        <input type="hidden" name="is_detail_acara" id="inIsDetailAcaraHidden" value="<?= $valIsDetailAcara ? '1' : '0' ?>">
                     </div>
                 </div>
 
-                <div id="detailAcaraFieldsArea" style="display: block;">
+                <div id="detailAcaraFieldsArea" style="display: <?= $valIsDetailAcara ? 'block' : 'none' ?>;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                         <div>
                             <label class="form-label-custom" style="font-size: 12px;">Mata Acara</label>
@@ -527,13 +622,30 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
-                        <div>
-                            <label class="form-label-custom" style="font-size: 12px;">Tgl. Hunting</label>
-                            <input type="text" name="tanggal_mulai" id="inTglHuntingP" value="<?= htmlspecialchars($valTanggalMulai) ?>" class="form-input-custom">
+                    <div id="gridTglPaket" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <!-- Tgl. Produksi (Selalu Row 1 Col 1) -->
+                        <div id="boxTglProduksi" style="grid-column: 1; grid-row: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                <label class="form-label-custom" style="font-size: 12px; margin-bottom: 0;">Tgl. Produksi</label>
+                                <!-- Toggle Switch Button Tgl. Hunting -->
+                                <label class="table-switch-wrap" style="padding: 0; border: none; background: transparent; cursor: pointer; margin: 0; display: inline-flex; align-items: center;" title="Aktif / Nonaktifkan Tgl. Hunting">
+                                    <input type="checkbox" name="is_tgl_hunting" value="1" id="tglHuntingToggleSwitch" class="table-switch-inp" <?= $isTglHuntingActive ? 'checked' : '' ?> onchange="toggleTglHuntingState(this.checked)">
+                                    <span class="table-switch-slider table-switch-slider-sm"></span>
+                                </label>
+                                <span style="font-size: 12px; color: #64748B; font-weight: 500;">(tgl. hunting)</span>
+                            </div>
+                            <input type="text" name="tanggal_mulai" id="inTglProduksiP" value="<?= htmlspecialchars($valTanggalMulai) ?>" class="form-input-custom">
                         </div>
-                        <div>
-                            <label class="form-label-custom" style="font-size: 12px;">Paket</label>
+
+                        <!-- Tgl. Hunting (Row 2 Col 1 saat aktif) -->
+                        <div id="boxTglHunting" style="display: <?= $isTglHuntingActive ? 'block' : 'none' ?>; grid-column: 1; grid-row: 2;">
+                            <label class="form-label-custom" style="font-size: 12px; margin-bottom: 6px;">Tgl. Hunting</label>
+                            <input type="text" name="tgl_hunting" id="inTglHuntingP" value="<?= htmlspecialchars($valTglHunting) ?>" class="form-input-custom" <?= $isTglHuntingActive ? '' : 'disabled' ?>>
+                        </div>
+
+                        <!-- Paket (Row 1 Col 2 saat hunting nonaktif, Row 2 Col 2 saat hunting aktif) -->
+                        <div id="boxPaket" style="grid-column: 2; grid-row: <?= $isTglHuntingActive ? '2' : '1' ?>;">
+                            <label class="form-label-custom" style="font-size: 12px; margin-bottom: 6px;">Paket</label>
                             <input type="text" name="paket" id="inPaketP" value="<?= htmlspecialchars($valPaket) ?>" class="form-input-custom">
                         </div>
                     </div>
@@ -599,6 +711,20 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                 .table-switch-inp:checked + .table-switch-slider::before {
                     transform: translateX(20px);
                 }
+                .table-switch-slider-sm {
+                    width: 32px !important;
+                    height: 18px !important;
+                    border-radius: 18px !important;
+                }
+                .table-switch-slider-sm::before {
+                    height: 14px !important;
+                    width: 14px !important;
+                    left: 2px !important;
+                    bottom: 2px !important;
+                }
+                .table-switch-inp:checked + .table-switch-slider-sm::before {
+                    transform: translateX(14px) !important;
+                }
                 .no-spinners::-webkit-outer-spin-button,
                 .no-spinners::-webkit-inner-spin-button {
                     -webkit-appearance: none;
@@ -610,8 +736,8 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                 }
             </style>
 
-            <div id="tableCardBox" style="background: #FAF5FF; border: 1px solid #E9D5FF; border-radius: 14px; padding: 20px; margin-bottom: 22px; transition: all 0.25s ease;">
-                <div id="tableHeaderBox" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; transition: all 0.25s ease;">
+            <div id="tableCardBox" style="background: #FAF5FF; border: 1px solid #E9D5FF; border-radius: 14px; padding: <?= $valIsTable ? '20px' : '10px 18px' ?>; margin-bottom: 22px; transition: all 0.25s ease; width: auto; display: <?= $valIsTable ? 'block' : 'inline-block' ?>;">
+                <div id="tableHeaderBox" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: <?= $valIsTable ? '14px' : '0' ?>; transition: all 0.25s ease;">
                     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                         <div style="width: 38px; height: 38px; border-radius: 10px; background: #FFFFFF; color: #7E22CE; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #E9D5FF;">
                             <i class="bi bi-people-fill"></i>
@@ -620,19 +746,19 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                         
                         <!-- Toggle Switch Button -->
                         <label class="table-switch-wrap" style="padding: 0; border: none; background: transparent; cursor: pointer; margin-left: 4px;">
-                            <input type="checkbox" id="tableToggleSwitch" class="table-switch-inp" onchange="toggleTableState(this.checked)">
+                            <input type="checkbox" id="tableToggleSwitch" class="table-switch-inp" <?= $valIsTable ? 'checked' : '' ?> onchange="toggleTableState(this.checked)">
                             <span class="table-switch-slider"></span>
                         </label>
 
                         <!-- Inline Column & Row Inputs -->
-                        <div id="inlineTableConfig" style="display: inline-flex; align-items: center; gap: 12px; margin-left: 10px; background: #FFFFFF; padding: 6px 16px; border-radius: 30px; border: 1px solid #E9D5FF; flex-wrap: wrap;">
+                        <div id="inlineTableConfig" style="display: <?= $valIsTable ? 'inline-flex' : 'none' ?>; align-items: center; gap: 12px; margin-left: 10px; background: #FFFFFF; padding: 6px 16px; border-radius: 30px; border: 1px solid #E9D5FF; flex-wrap: wrap;">
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <label style="font-size: 12px; font-weight: 700; color: #581C87; margin: 0;">Jumlah Kolom:</label>
-                                <input type="number" min="1" max="10" id="inColCount" value="<?= !empty($savedKruData['headers']) ? count($savedKruData['headers']) : 6 ?>" oninput="autoUpdateTableFromInputs()" class="form-input-custom no-spinners" style="width: 50px; padding: 2px 8px; font-size: 12.5px; background: #FFF; text-align: center; border-radius: 8px;">
+                                <input type="number" min="1" max="10" id="inColCount" value="<?= !empty($savedKruData['headers']) ? count($savedKruData['headers']) : 6 ?>" oninput="handleColCountInput(this)" onchange="handleColCountInput(this)" onblur="handleColCountBlur(this)" class="form-input-custom no-spinners" style="width: 50px; padding: 2px 8px; font-size: 12.5px; background: #FFF; text-align: center; border-radius: 8px;">
                             </div>
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <label style="font-size: 12px; font-weight: 700; color: #581C87; margin: 0;">Jumlah Baris:</label>
-                                <input type="number" min="1" max="20" id="inRowCount" value="<?= !empty($savedKruData['rows']) ? min(20, count($savedKruData['rows'])) : 8 ?>" oninput="validateAndSetRowCount(this)" onchange="validateAndSetRowCount(this)" class="form-input-custom no-spinners" style="width: 50px; padding: 2px 8px; font-size: 12.5px; background: #FFF; text-align: center; border-radius: 8px;">
+                                <input type="number" min="1" max="20" id="inRowCount" value="<?= !empty($savedKruData['rows']) ? min(20, count($savedKruData['rows'])) : 8 ?>" oninput="handleRowCountInput(this)" onchange="handleRowCountInput(this)" onblur="handleRowCountBlur(this)" class="form-input-custom no-spinners" style="width: 50px; padding: 2px 8px; font-size: 12.5px; background: #FFF; text-align: center; border-radius: 8px;">
                                 <span id="rowMaxBadge" style="font-size: 11px; color: #7E22CE; font-weight: 700; background: #FAF5FF; padding: 2px 7px; border-radius: 6px; border: 1px solid #E9D5FF;" title="Maksimal 20 baris saat detail acara aktif (posisi TTD pas mentok di atas footer A4)">Maks. 20</span>
                             </div>
                         </div>
@@ -640,7 +766,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                 </div>
 
                 <!-- Dynamic Table Render Container -->
-                <div id="customTableRenderArea" style="display: block; margin-top: 18px; overflow-x: auto;">
+                <div id="customTableRenderArea" style="display: <?= $valIsTable ? 'block' : 'none' ?>; margin-top: 18px; overflow-x: auto;">
                     <!-- Live editable table inputs render here -->
                 </div>
 
@@ -648,11 +774,11 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                 <input type="hidden" name="kru_table_json" id="inKruTableJsonHidden">
 
                 <!-- Kalimat Penutup Input (Di Bawah Tabel Kru Builder) -->
-                <div id="penutupInputBlock" style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed #E9D5FF;">
+                <div id="penutupInputBlock" style="display: <?= $valIsTable ? 'block' : 'none' ?>; margin-top: 18px; padding-top: 14px; border-top: 1px dashed #E9D5FF;">
                     <label class="form-label-custom" style="font-size: 13px; font-weight: 700; color: #581C87;">
                         Kalimat Penutup Surat Permohonan
                     </label>
-                    <textarea name="penutup_surat" id="inPenutupP" rows="4" class="form-input-custom" required style="resize: vertical;"><?= htmlspecialchars($valPenutupDinas) ?></textarea>
+                    <textarea name="penutup_surat" id="inPenutupP" rows="4" class="form-input-custom" <?= $valIsTable ? 'required' : '' ?> style="resize: vertical;"><?= htmlspecialchars($valPenutupDinas) ?></textarea>
                 </div>
             </div>
 
@@ -749,96 +875,9 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
             </div>
         </div>
 
-        <!-- ========================================================================= -->
-        <!-- BAGIAN 2: FORM SURAT DINAS / NOTA DINAS IZIN PRODUKSI (BAGIAN BAHAW) -->
-        <!-- ========================================================================= -->
-        <div id="bagian2Card" class="card-panel-variant" style="border: 2px solid #BFDBFE; background: #FFFFFF; border-radius: 18px; padding: 28px; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.05); position: relative; z-index: 10;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px dashed #DBEAFE;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #EFF6FF; color: #1D4ED8; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800;">
-                        2
-                    </div>
-                    <div>
-                        <h2 style="font-size: 17px; font-weight: 800; color: #1E3A8A; margin: 0; display: flex; align-items: center; gap: 8px;">
-                            <i class="bi bi-building-fill-gear" style="color: #2563EB;"></i> BAGIAN 2: SURAT DINAS / NOTA DINAS IZIN PRODUKSI
-                        </h2>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Fixed Defaults Hidden Inputs for Surat Dinas -->
-            <input type="hidden" name="kepada" id="inKepada" value="Kepala TVRI Stasiun Jawa Timur">
-            <input type="hidden" name="kepada_sub" id="inKepadaSub" value="TVRI Stasiun Jawa Timur">
-            <input type="hidden" name="dari" value="Kepala Sub Bagian Tata Usaha">
-            <input type="hidden" name="penandatangan_nama" value="<?= htmlspecialchars($tuNama) ?>">
-            <input type="hidden" name="penandatangan_nip" value="<?= htmlspecialchars($tuNip) ?>">
-            <input type="hidden" name="penandatangan_jabatan" value="Kepala Sub Bagian Tata Usaha TVRI Stasiun Jawa Timur">
-
-            <!-- Editable Inputs for Surat Dinas Produksi -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px;">
-                <div class="form-group-block">
-                    <label class="form-label-custom">Nomor Surat Nota Dinas</label>
-                    <input type="text" name="nomor_surat" id="inNomorSurat" value="<?= htmlspecialchars($valNomorSurat) ?>" placeholder="Contoh: B-042/TU/TVRI-JATIM/2026" class="form-input-custom">
-                </div>
-                <div class="form-group-block">
-                    <label class="form-label-custom">Hal / Perihal Nota Dinas</label>
-                    <input type="text" name="perihal" id="inHal" value="<?= htmlspecialchars($valPerihalDinas) ?>" required class="form-input-custom">
-                </div>
-                <div class="form-group-block">
-                    <label class="form-label-custom">Sifat Surat</label>
-                    <div class="input-wrapper" id="sifatSuratContainer" style="position: relative; width: 100%;">
-                        <input type="hidden" name="sifat_surat" id="inSifat" value="<?= htmlspecialchars($valSifatDinas) ?>" required>
-
-                        <button type="button" class="custom-select-trigger" id="sifatSuratDropdownTrigger" onclick="toggleSifatSuratMenu(event)" style="width: 100%; display: flex; align-items: center; justify-content: space-between; height: 46px; padding: 10px 16px; background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 12px; font-size: 14px; color: #1F2937; font-weight: 500; cursor: pointer; transition: all 0.2s ease; outline: none; position: relative;">
-                            <span id="sifatSuratSelectedText" style="color: #1F2937; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;"><?= htmlspecialchars($valSifatDinas) ?></span>
-                            <i class="bi bi-chevron-down" id="sifatSuratChevronIcon" style="font-size: 13px; color: #6B7280; transition: transform 0.2s ease;"></i>
-                        </button>
-
-                        <!-- Custom Positioned Dropdown Popup Menu for Selecting Sifat Surat -->
-                        <div id="sifatSuratDropdownMenu" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; width: 100%; z-index: 99999; background: #FFFFFF; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.05); border: 1.5px solid #005BAC; padding: 6px;">
-                            <div style="max-height: 250px; overflow-y: auto; padding-right: 2px;" id="sifatSuratOptionsList">
-                                <div class="custom-sifat-option-item" data-val="Biasa" onclick="selectSifatSuratOption('Biasa', this)" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease; margin-bottom: 2px;">
-                                    <span style="font-size: 13.5px; font-weight: 600; color: #1F2937;">Biasa</span>
-                                    <i class="bi bi-check2 check-icon-sifat" style="display: none; color: #005BAC; font-size: 18px; font-weight: 800;"></i>
-                                </div>
-                                <div class="custom-sifat-option-item" data-val="Segera" onclick="selectSifatSuratOption('Segera', this)" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease; margin-bottom: 2px;">
-                                    <span style="font-size: 13.5px; font-weight: 600; color: #1F2937;">Segera</span>
-                                    <i class="bi bi-check2 check-icon-sifat" style="display: none; color: #005BAC; font-size: 18px; font-weight: 800;"></i>
-                                </div>
-                                <div class="custom-sifat-option-item" data-val="Sangat Segera" onclick="selectSifatSuratOption('Sangat Segera', this)" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease; margin-bottom: 2px;">
-                                    <span style="font-size: 13.5px; font-weight: 600; color: #1F2937;">Sangat Segera</span>
-                                    <i class="bi bi-check2 check-icon-sifat" style="display: none; color: #005BAC; font-size: 18px; font-weight: 800;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
-                <div class="form-group-block">
-                    <label class="form-label-custom">Lampiran</label>
-                    <input type="text" name="lampiran" id="inLampiran" value="<?= htmlspecialchars($valLampiranDinas) ?>" required class="form-input-custom">
-                </div>
-                <div class="form-group-block">
-                    <label class="form-label-custom">Tanggal Nota Dinas</label>
-                    <div class="modern-datepicker-wrapper">
-                        <input type="text" name="tanggal_surat" id="inTanggal" value="<?= htmlspecialchars($valTanggalDinas) ?>" required class="form-input-custom modern-datepicker" placeholder="Pilih tanggal nota dinas...">
-                        <span class="datepicker-calendar-icon" title="Buka Kalender">
-                            <i class="bi bi-calendar2-event-fill"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group-block" style="margin-bottom: 10px;">
-                <label class="form-label-custom">Isi Surat Nota Dinas</label>
-                <textarea name="isi_surat" id="inIsiSurat" rows="6" class="form-input-custom" required><?= htmlspecialchars($valIsiDinas) ?></textarea>
-            </div>
-        </div>
 
         <!-- ========================================================================= -->
-        <!-- BAGIAN 3: UPLOAD BERKAS LAMPIRAN (OPSIONAL) -->
+        <!-- BAGIAN 3: UPLOAD LAMPIRAN (OPSIONAL) -->
         <!-- ========================================================================= -->
         <div id="bagian3Card" class="card-panel-variant" style="border: 2px solid #FCA5A5; background: #FFFFFF; border-radius: 18px; padding: 28px; box-shadow: 0 4px 16px rgba(220, 38, 38, 0.05); position: relative; z-index: 5;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 2px dashed #FEE2E2;">
@@ -848,7 +887,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                     </div>
                     <div>
                         <h2 style="font-size: 17px; font-weight: 800; color: #991B1B; margin: 0; display: flex; align-items: center; gap: 8px;">
-                            BAGIAN 3: UPLOAD BERKAS LAMPIRAN
+                            BAGIAN 3: UPLOAD LAMPIRAN
                         </h2>
                     </div>
                 </div>
@@ -875,12 +914,19 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
 
         <!-- Action Bar Floating Card -->
         <div class="card-panel-variant" style="border-radius: 16px; padding: 18px 24px; background: #FFFFFF; border: 1.5px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <button type="button" onclick="openBarcodeModal()" id="btnBarcodeModal" class="btn-btn" style="background: #F0FDF4; color: #16A34A; border: 1.5px solid #16A34A; font-weight: 700; transition: all 0.2s;">
-                    <i class="bi bi-qr-code-scan"></i> <span id="btnBarcodeLabel">Generate Barcode</span>
-                </button>
+            <!-- Left: Toggle Switch Surat Tugas -->
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <label class="table-switch-wrap" style="padding: 7px 16px; margin: 0; cursor: pointer; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px;" title="Aktif / Nonaktifkan Alur Surat Tugas">
+                    <input type="checkbox" id="suratTugasToggleSwitch" class="table-switch-inp" <?= $valHasSuratTugas ? 'checked' : '' ?> onchange="toggleSuratTugasState(this.checked)">
+                    <span class="table-switch-slider"></span>
+                    <span id="suratTugasLabelText" style="font-size: 13.5px; font-weight: 700; color: #1E293B;">
+                        Surat Tugas: <?= $valHasSuratTugas ? '<span style="color: #7E22CE;">Aktif</span>' : '<span style="color: #64748B;">Nonaktif</span>' ?>
+                    </span>
+                </label>
+                <input type="hidden" name="has_surat_tugas" id="inHasSuratTugas" value="<?= $valHasSuratTugas ? '1' : '0' ?>">
             </div>
 
+            <!-- Right: Batal & Review dan Kirim Buttons -->
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <a href="<?= $isEdit ? (BASE_URL . '/surat/revisi') : (BASE_URL . '/dashboard') ?>" class="btn-btn btn-btn-secondary">Batal</a>
                 
@@ -930,7 +976,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
             <!-- Live Barcode Preview Box -->
             <div style="background: #F8FAFC; border: 1.5px dashed #16A34A; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                 <div style="border: 2px solid #000; padding: 6px; background: #FFF; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;">
-                    <img id="modalQrPreviewImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fdrive.google.com" style="width: 128px; height: 128px; object-fit: contain;" alt="QR Code Preview">
+                    <img id="modalQrPreviewImg" src="<?= BASE_URL ?>/assets/img/barcode_placeholder.png" style="width: 128px; height: 128px; object-fit: contain;" alt="Barcode Preview">
                 </div>
                 <div id="modalQrStatusText" style="font-size: 12.5px; font-weight: 800; color: #15803D; display: flex; align-items: center; gap: 6px;">
                     <i class="bi bi-patch-check-fill" style="font-size: 16px;"></i> VERIFIED DIGITAL QR GOOGLE DRIVE
@@ -961,18 +1007,116 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                     <i class="bi bi-file-earmark-check-fill"></i>
                 </div>
                 <div>
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #581C87; letter-spacing: -0.2px;">Review &amp; Konfirmasi Dokumen Surat Izin Produksi</h3>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #581C87; letter-spacing: -0.2px;">Review &amp; Konfirmasi Dokumen Surat Nota Dinas</h3>
                 </div>
             </div>
         </div>
 
         <!-- Document Canvas Preview Container -->
         <div style="padding: 20px 24px; overflow-y: auto; background: #F8FAFC; flex: 1; display: flex; flex-direction: column; gap: 20px;">
-            <!-- ROW 1: SURAT PERMOHONAN & NOTA DINAS (SIDE-BY-SIDE) -->
+            <!-- ROW 1: SURAT NOTA DINAS & SURAT PERMOHONAN (SIDE-BY-SIDE) -->
             <div style="display: flex; flex-direction: row; gap: 20px; align-items: stretch; flex-wrap: nowrap; width: 100%;">
-                <!-- PREVIEW 1: SURAT PERMOHONAN (BAGIAN 1 / SISI KIRI) -->
+                <!-- PREVIEW 1: SURAT NOTA DINAS (SISI KIRI) -->
                 <div style="flex: 1 1 0px; min-width: 0; width: 50%; max-width: 50%; box-sizing: border-box; display: flex; flex-direction: column;">
-                    <div class="a4-paper-preview" style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 2.2cm 2.5cm; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #000000; position: relative; height: 270mm; max-height: 270mm; min-height: 270mm; overflow: hidden; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; width: 100%;">
+                    <div class="a4-paper-preview" style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 2.2cm 2.5cm; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; position: relative; height: 270mm; max-height: 270mm; min-height: 270mm; overflow: hidden; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; width: 100%;">
+                        <div>
+                            <!-- Logo Top Left -->
+                            <div style="margin-bottom: 18px;">
+                                <img src="<?= BASE_URL ?>/assets/img/tvri3.svg" style="height: 58px; width: auto;" alt="TVRI Logo">
+                            </div>
+
+                            <!-- Title Centered -->
+                            <div style="text-align: center; margin-bottom: 14px; line-height: 1.1;">
+                                <h2 style="font-size: 12px; font-weight: normal; letter-spacing: 0.5px; margin: 0; color: #000000; text-transform: uppercase; text-decoration: underline; line-height: 1.1; display: inline-block;">NOTA DINAS</h2>
+                                <div style="font-size: 10px; color: #111111; margin-top: 0px; line-height: 1.1;">Nomor : <span id="pvNomorSurat"></span></div>
+                            </div>
+
+                            <!-- Metadata Table -->
+                            <table style="width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.15; margin-bottom: 10px; color: #000000;">
+                                <tr>
+                                    <td style="width: 100px; vertical-align: top; padding: 2px 0;">Kepada Yth</td>
+                                    <td style="width: 12px; vertical-align: top; padding: 2px 0;">:</td>
+                                    <td style="vertical-align: top; padding: 2px 0;">
+                                        <span id="pvKepada" style="font-weight: normal;">Kepala TVRI Stasiun Jawa Timur</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top; padding: 2px 0;">Dari</td>
+                                    <td style="vertical-align: top; padding: 2px 0;">:</td>
+                                    <td style="vertical-align: top; padding: 2px 0;">Kepala Sub Bagian Tata Usaha</td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top; padding: 2px 0;">Hal</td>
+                                    <td style="vertical-align: top; padding: 2px 0;">:</td>
+                                    <td id="pvHal" style="vertical-align: top; padding: 2px 0; font-weight: normal;"><?= htmlspecialchars($valPerihalDinas) ?></td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top; padding: 2px 0;">Sifat</td>
+                                    <td style="vertical-align: top; padding: 2px 0;">:</td>
+                                    <td id="pvSifat" style="vertical-align: top; padding: 2px 0;">Biasa</td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top; padding: 2px 0;">Lampiran</td>
+                                    <td style="vertical-align: top; padding: 2px 0;">:</td>
+                                    <td id="pvLampiran" style="vertical-align: top; padding: 2px 0;"><?= htmlspecialchars($valLampiranDinas) ?></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 100px; vertical-align: top; padding: 2px 0;">Tanggal</td>
+                                    <td style="width: 12px; vertical-align: top; padding: 2px 0;">:</td>
+                                    <td id="pvTanggal" style="vertical-align: top; padding: 2px 0;"><?= date('d F Y') ?></td>
+                                </tr>
+                            </table>
+
+                            <div style="border-top: 1.5px solid #000000; margin: 10px 0 16px 0;"></div>
+                            <div style="font-size: 10px; color: #000000; margin-bottom: 8px; line-height: 1.15;">Dengan hormat,</div>
+                            <div id="pvIsiSurat" style="line-height: 1.15; text-align: justify; font-size: 10px; font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; margin-bottom: 24px; white-space: pre-line;"></div>
+
+                            <!-- Signature Block directly under content (Align Left TTD) -->
+                            <div style="display: flex; justify-content: flex-end; margin-top: 48px; margin-bottom: 24px;">
+                                <div style="width: 240px; text-align: left; font-size: 10px; line-height: 1.15; color: #000000;">
+                                    <div>Mengetahui,</div>
+                                    <div>Kepala Sub Bagian Tata Usaha</div>
+                                    <div style="height: 55px; margin: 4px 0;"></div>
+                                    <div style="text-decoration: underline;"><?= htmlspecialchars($tuNama) ?></div>
+                                    <div><?= htmlspecialchars($tuNip) ?></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="padding-top: 12px;">
+                            <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 58px; height: 58px; border: 1.5px solid #000000; background: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; padding: 2px; pointer-events: none; user-select: none;" id="pvBarcodeContainer" title="Barcode">
+                                        <img id="pvBarcodeImg" src="<?= BASE_URL ?>/assets/img/barcode_placeholder.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Barcode">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px; font-size: 7.5px; color: #333333; line-height: 1.3;">
+                                <div style="color: #0052CC;">
+                                    LEMBAGA PENYIARAN PUBLIK<br>
+                                    TELEVISI REPUBLIK INDONESIA<br>
+                                    STASIUN JAWA TIMUR
+                                </div>
+                                <div>
+                                    Jl. Mayjend Sungkono No.124,<br>
+                                    Surabaya, Jawa Timur, 60189<br>
+                                    Indonesia
+                                </div>
+                                <div style="color: #0052CC;">
+                                    P (031) 567452 5678298<br>
+                                    F (031) 5678452 5616774<br>
+                                    www.tvri.go.id
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREVIEW 2: SURAT PERMOHONAN (SISI KANAN) -->
+                <div style="flex: 1 1 0px; min-width: 0; width: 50%; max-width: 50%; box-sizing: border-box; display: flex; flex-direction: column;">
+                    <div class="a4-paper-preview" style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 2.2cm 2.5cm; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; position: relative; height: 270mm; max-height: 270mm; min-height: 270mm; overflow: hidden; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; width: 100%;">
                     <div>
                         <!-- Logo Top Left -->
                         <div style="margin-bottom: 12px;">
@@ -980,61 +1124,74 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                         </div>
 
                         <!-- Header Line: Perihal Left, Tanggal Right -->
-                        <div style="font-size: 12.5px; margin-bottom: 14px; color: #000000;">
+                        <div style="font-size: 10px; line-height: 1.3; margin-bottom: 14px; color: #000000;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                <div>
-                                    <div>Perihal : <span id="pvPPerihal" style="font-weight: 500;">Permohonan Hunting Produksi</span></div>
+                                <div style="max-width: 240px; word-break: break-word; overflow-wrap: break-word;">
+                                    <div>Perihal : <span id="pvPPerihal" style="font-weight: normal;"><?= htmlspecialchars($valPerihalPermohonan) ?></span></div>
                                 </div>
                                 <div id="pvPTanggal" style="white-space: nowrap;">Surabaya, <?= date('d F Y') ?></div>
                             </div>
                         </div>
 
                         <!-- Kepada Block (dengan Jarak ke Dengan hormat) -->
-                        <div style="font-size: 12.5px; line-height: 1.4; margin-bottom: 14px; color: #000000;">
+                        <div style="font-size: 10px; line-height: 1.4; margin-bottom: 14px; color: #000000;">
                             <div>Kepada :</div>
-                            <div id="pvPKepada" style="font-weight: 500;">Yth. Kepala Sub Bagian Tata Usaha</div>
-                            <div id="pvPKepadaSub" style="font-weight: 500;">TVRI Stasiun Jawa Timur</div>
+                            <div id="pvPKepada" style="font-weight: normal;">Yth. Kepala Sub Bagian Tata Usaha</div>
+                            <div id="pvPKepadaSub" style="font-weight: normal;">TVRI Stasiun Jawa Timur</div>
                         </div>
 
                         <!-- Salutation & Pembuka -->
-                        <div style="font-size: 12.5px; line-height: 1.2; margin-bottom: 10px; color: #000000;">
+                        <div style="font-size: 10px; line-height: 1.2; margin-bottom: 10px; color: #000000;">
                             <div style="margin-bottom: 4px;">Dengan hormat,</div>
-                            <div id="pvPPembuka" style="margin-bottom: 6px; font-size: 12px; font-family: Arial, sans-serif; color: #000000; line-height: 1.2;">Sehubungan dengan adanya permintaan kerjasama dari bidang PU dan Promo, maka kami mengajukan permohonan produksi acara sebagai berikut :</div>
+                            <div id="pvPPembuka" style="margin-bottom: 6px; font-size: 10px; font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; line-height: 1.2;"><?= htmlspecialchars($valPembukaPermohonan) ?></div>
                         </div>
 
                         <!-- Detail Parameter Grid Preview (Centered, 2 Column Alignment, Line Height 1.15) -->
-                        <table id="pvPDetailAcaraBlock" style="width: 100%; border-collapse: collapse; font-size: 11px; line-height: 1.2; margin: 0 auto 10px auto; color: #000000;">
+                        <table id="pvPDetailAcaraBlock" style="width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.2; margin: 0 auto 10px auto; color: #000000; display: <?= $valIsDetailAcara ? 'table' : 'none' ?>;">
                             <tr>
                                 <td style="width: 100px; vertical-align: top; padding: 2px 0;">Mata Acara</td>
                                 <td style="width: 10px; vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvPMataAcara" style="vertical-align: top; padding: 2px 0; width: 35%;">Hunting</td>
+                                <td id="pvPMataAcara" style="vertical-align: top; padding: 2px 0; width: 35%;"><?= htmlspecialchars($valMataAcara) ?></td>
                                 
                                 <td style="width: 100px; vertical-align: top; padding: 2px 0;">Lokasi Syuting</td>
                                 <td style="width: 10px; vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvPLokasi" style="vertical-align: top; padding: 2px 0;">Mojokerto</td>
+                                <td id="pvPLokasi" style="vertical-align: top; padding: 2px 0;"><?= htmlspecialchars($valLokasiSyuting) ?></td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top; padding: 2px 0;">Judul</td>
                                 <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvPJudul" colspan="4" style="vertical-align: top; padding: 2px 0;">Hunting Company Profile</td>
+                                <td id="pvPJudul" colspan="4" style="vertical-align: top; padding: 2px 0;"><?= htmlspecialchars($valNamaProgram) ?></td>
                             </tr>
-                            <tr>
+                            <tr id="pvPRowTglProduksi">
+                                <td style="vertical-align: top; padding: 2px 0;">Tgl. Produksi</td>
+                                <td style="vertical-align: top; padding: 2px 0;">:</td>
+                                <td id="pvPTglProduksi" style="vertical-align: top; padding: 2px 0;"><?= htmlspecialchars($valTanggalMulai) ?></td>
+                                
+                                <td id="pvPTdPaketLbl1" style="vertical-align: top; padding: 2px 0; display: <?= $isTglHuntingActive ? 'none' : 'table-cell' ?>;">Paket</td>
+                                <td id="pvPTdPaketColon1" style="vertical-align: top; padding: 2px 0; display: <?= $isTglHuntingActive ? 'none' : 'table-cell' ?>;">:</td>
+                                <td id="pvPTdPaketVal1" style="vertical-align: top; padding: 2px 0; display: <?= $isTglHuntingActive ? 'none' : 'table-cell' ?>;"><?= !empty($valPaket) ? htmlspecialchars($valPaket) : '-' ?></td>
+
+                                <td id="pvPTdEmpty1" style="vertical-align: top; padding: 2px 0; display: <?= $isTglHuntingActive ? 'table-cell' : 'none' ?>;"></td>
+                                <td id="pvPTdEmpty2" style="vertical-align: top; padding: 2px 0; display: <?= $isTglHuntingActive ? 'table-cell' : 'none' ?>;"></td>
+                                <td id="pvPTdEmpty3" style="vertical-align: top; padding: 2px 0; display: <?= $isTglHuntingActive ? 'table-cell' : 'none' ?>;"></td>
+                            </tr>
+                            <tr id="pvPRowTglHunting" style="display: <?= $isTglHuntingActive ? 'table-row' : 'none' ?>;">
                                 <td style="vertical-align: top; padding: 2px 0;">Tgl. Hunting</td>
                                 <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvPTglHunting" style="vertical-align: top; padding: 2px 0;">17 September 2026</td>
+                                <td id="pvPTglHunting" style="vertical-align: top; padding: 2px 0;"><?= !empty($valTglHunting) ? htmlspecialchars($valTglHunting) : '-' ?></td>
                                 
                                 <td style="vertical-align: top; padding: 2px 0;">Paket</td>
                                 <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvPPaket" style="vertical-align: top; padding: 2px 0;">-</td>
+                                <td id="pvPTdPaketVal2" style="vertical-align: top; padding: 2px 0;"><?= !empty($valPaket) ? htmlspecialchars($valPaket) : '-' ?></td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top; padding: 2px 0;">Tgl. Siaran</td>
                                 <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvPTglSiaran" style="vertical-align: top; padding: 2px 0;">Menyesuaikan Pola</td>
+                                <td id="pvPTglSiaran" style="vertical-align: top; padding: 2px 0;"><?= htmlspecialchars($valTglSiaran) ?></td>
                                 
                                 <td style="vertical-align: top; padding: 2px 0;">Sumber Biaya</td>
                                 <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvPSumberBiaya" style="vertical-align: top; padding: 2px 0;">PNBP</td>
+                                <td id="pvPSumberBiaya" style="vertical-align: top; padding: 2px 0;"><?= htmlspecialchars($valSumberBiaya) ?></td>
                             </tr>
                         </table>
 
@@ -1042,8 +1199,8 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                         <div style="margin-bottom: 8px; overflow-x: auto;" id="pvPKruTableContainer"></div>
 
                         <!-- Signature Block directly under content (Centered Alignment inside Right Box) -->
-                        <div style="display: flex; justify-content: flex-end; margin-top: 8px; margin-bottom: 4px;">
-                            <div style="width: 280px; max-width: 100%; text-align: center; font-size: 11px; line-height: 1.15; color: #000000; word-wrap: break-word; overflow-wrap: break-word; box-sizing: border-box;">
+                        <div style="display: flex; justify-content: flex-end; margin-top: 36px; margin-bottom: 4px;">
+                            <div style="width: 280px; max-width: 100%; text-align: center; font-size: 10px; line-height: 1.15; color: #000000; word-wrap: break-word; overflow-wrap: break-word; box-sizing: border-box;">
                                 <div id="pvPJabatanPenandatangan" style="white-space: normal; word-wrap: break-word; word-break: normal;">Ketua Perencana dan Pengendalian Program</div>
                                 <div id="pvPInstansiPenandatangan">TVRI Stasiun Jawa Timur</div>
                                 <div style="min-height: 44px; margin: 3px 0; display: flex; align-items: center; justify-content: center;">
@@ -1058,9 +1215,9 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
 
                     <!-- Footer -->
                     <div style="padding-top: 8px;">
-                            <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px; font-size: 9px; color: #333333; line-height: 1.35;">
-                                <div>
-                                    <strong>LEMBAGA PENYIARAN PUBLIK</strong><br>
+                            <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px; font-size: 7.5px; color: #333333; line-height: 1.3;">
+                                <div style="color: #0052CC;">
+                                    LEMBAGA PENYIARAN PUBLIK<br>
                                     TELEVISI REPUBLIK INDONESIA<br>
                                     STASIUN JAWA TIMUR
                                 </div>
@@ -1069,7 +1226,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                                     Surabaya, Jawa Timur, 60189<br>
                                     Indonesia
                                 </div>
-                                <div>
+                                <div style="color: #0052CC;">
                                     P (031) 567452 5678298<br>
                                     F (031) 5678452 5616774<br>
                                     www.tvri.go.id
@@ -1079,103 +1236,7 @@ $savedKruData = !empty($savedKruTableJson) ? json_decode($savedKruTableJson, tru
                     </div>
                 </div>
 
-            <!-- PREVIEW 2: SURAT DINAS / NOTA DINAS (BAGIAN 2 / SISI KANAN) -->
-            <div style="flex: 1 1 0px; min-width: 0; width: 50%; max-width: 50%; box-sizing: border-box; display: flex; flex-direction: column;">
-                <div class="a4-paper-preview" style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 3cm; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #000000; position: relative; height: 270mm; max-height: 270mm; min-height: 270mm; overflow: hidden; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; width: 100%;">
-                    <div>
-                        <!-- Logo Top Left -->
-                        <div style="margin-bottom: 18px;">
-                            <img src="<?= BASE_URL ?>/assets/img/tvri3.svg" style="height: 58px; width: auto;" alt="TVRI Logo">
-                        </div>
 
-                        <!-- Title Centered -->
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <h2 style="font-size: 18px; font-weight: normal; letter-spacing: normal; margin: 0; color: #000000; text-transform: uppercase; text-decoration: underline;">NOTA DINAS</h2>
-                            <div style="font-size: 13px; color: #111111; margin-top: 4px;">Nomor : <span id="pvNomorSurat"></span></div>
-                        </div>
-
-                        <!-- Metadata Table -->
-                        <table style="width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.15; margin-bottom: 10px; color: #000000;">
-                            <tr>
-                                <td style="width: 100px; vertical-align: top; padding: 2px 0;">Kepada Yth</td>
-                                <td style="width: 12px; vertical-align: top; padding: 2px 0;">:</td>
-                                <td style="vertical-align: top; padding: 2px 0;">
-                                    <span id="pvKepada" style="font-weight: 500;">Kepala TVRI Stasiun Jawa Timur</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="vertical-align: top; padding: 2px 0;">Dari</td>
-                                <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td style="vertical-align: top; padding: 2px 0;">Kepala Sub Bagian Tata Usaha</td>
-                            </tr>
-                            <tr>
-                                <td style="vertical-align: top; padding: 2px 0;">Hal</td>
-                                <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvHal" style="vertical-align: top; padding: 2px 0; font-weight: 500;">Permohonan Hunting Produksi dan Penyiaran</td>
-                            </tr>
-                            <tr>
-                                <td style="vertical-align: top; padding: 2px 0;">Sifat</td>
-                                <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvSifat" style="vertical-align: top; padding: 2px 0;">Biasa</td>
-                            </tr>
-                            <tr>
-                                <td style="vertical-align: top; padding: 2px 0;">Lampiran</td>
-                                <td style="vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvLampiran" style="vertical-align: top; padding: 2px 0;">3 (Tiga)</td>
-                            </tr>
-                            <tr>
-                                <td style="width: 100px; vertical-align: top; padding: 2px 0;">Tanggal</td>
-                                <td style="width: 12px; vertical-align: top; padding: 2px 0;">:</td>
-                                <td id="pvTanggal" style="vertical-align: top; padding: 2px 0;"><?= date('d F Y') ?></td>
-                            </tr>
-                        </table>
-
-                        <div style="border-top: 1.5px solid #000000; margin: 10px 0 16px 0;"></div>
-                        <div style="font-size: 13px; color: #000000; margin-bottom: 8px; line-height: 1.15;">Dengan hormat,</div>
-                        <div id="pvIsiSurat" style="line-height: 1.15; text-align: justify; font-size: 13px; font-family: Arial, sans-serif; color: #000000; margin-bottom: 24px; white-space: pre-line;"></div>
-
-                        <!-- Signature Block directly under content (Align Left TTD) -->
-                        <div style="display: flex; justify-content: flex-end; margin-top: 24px; margin-bottom: 24px;">
-                            <div style="width: 240px; text-align: left; font-size: 12.5px; line-height: 1.15; color: #000000;">
-                                <div>Mengetahui,</div>
-                                <div>Kepala Sub Bagian Tata Usaha</div>
-                                <div style="height: 55px; margin: 4px 0;"></div>
-                                <div style="text-decoration: underline;"><?= htmlspecialchars($tuNama) ?></div>
-                                <div><?= htmlspecialchars($tuNip) ?></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer -->
-                    <div style="padding-top: 12px;">
-                        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 8px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div style="width: 58px; height: 58px; border: 1.5px solid #000000; background: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; padding: 2px;" id="pvBarcodeContainer">
-                                    <img id="pvBarcodeImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fdrive.google.com" style="width: 100%; height: 100%; object-fit: contain;" alt="Barcode QR">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px; font-size: 9px; color: #333333; line-height: 1.35;">
-                            <div>
-                                <strong>LEMBAGA PENYIARAN PUBLIK</strong><br>
-                                TELEVISI REPUBLIK INDONESIA<br>
-                                STASIUN JAWA TIMUR
-                            </div>
-                            <div>
-                                Jl. Mayjend Sungkono No.124,<br>
-                                Surabaya, Jawa Timur, 60189<br>
-                                Indonesia
-                            </div>
-                            <div>
-                                P (031) 567452 5678298<br>
-                                F (031) 5678452 5616774<br>
-                                www.tvri.go.id
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
             </div> <!-- END ROW 1 CONTAINER -->
 
             <!-- ROW 2: DOKUMEN PDF LAMPIRAN (TERLETAK DI BAWAH BARIS PERMOHONAN & NOTA DINAS) -->
@@ -1328,7 +1389,10 @@ let currentRows = (savedKruData && savedKruData.rows && savedKruData.rows.length
         ['8', '', '', '16', '', '']
     ];
 
-let isTableEnabled = true;
+let masterRowData = JSON.parse(JSON.stringify(currentRows));
+let masterHeaderData = [...currentHeaders];
+
+let isTableEnabled = <?= $valIsTable ? 'true' : 'false' ?>;
 
 function normalizeColWidths() {
     if (!currentColWidths || currentColWidths.length !== currentHeaders.length) {
@@ -1347,7 +1411,7 @@ function normalizeColWidths() {
 
 function getMaxAllowedRows() {
     const detailAcaraSwitch = document.getElementById('detailAcaraToggleSwitch');
-    const isDetailAcaraActive = detailAcaraSwitch ? detailAcaraSwitch.checked : true;
+    const isDetailAcaraActive = detailAcaraSwitch ? detailAcaraSwitch.checked : false;
     return isDetailAcaraActive ? 20 : 25;
 }
 
@@ -1374,11 +1438,50 @@ function updateRowLimitUI() {
     autoUpdateTableFromInputs();
 }
 
-function validateAndSetRowCount(el) {
-    let val = parseInt(el.value, 10);
+function handleColCountInput(el) {
+    const rawVal = (el && el.value !== undefined) ? el.value.toString().trim() : '';
+    if (rawVal === '') {
+        // Izinkan input kolom dihapus bersih agar user bisa mengetik manual dengan leluasa
+        return;
+    }
+    let val = parseInt(rawVal, 10);
+    if (isNaN(val)) return;
+
+    if (val > 10) {
+        val = 10;
+        el.value = 10;
+    } else if (val < 1) {
+        return;
+    }
+    autoUpdateTableFromInputs();
+}
+
+function handleColCountBlur(el) {
+    if (!el) return;
+    const rawVal = el.value.toString().trim();
+    let val = parseInt(rawVal, 10);
+    if (rawVal === '' || isNaN(val) || val < 1) {
+        val = currentHeaders.length || 6;
+        el.value = val;
+    } else if (val > 10) {
+        val = 10;
+        el.value = 10;
+    }
+    autoUpdateTableFromInputs();
+}
+
+function handleRowCountInput(el) {
+    const rawVal = (el && el.value !== undefined) ? el.value.toString().trim() : '';
+    if (rawVal === '') {
+        // Izinkan input baris dihapus bersih agar user bisa mengetik manual dengan leluasa
+        return;
+    }
+    let val = parseInt(rawVal, 10);
+    if (isNaN(val)) return;
+
     const maxRows = getMaxAllowedRows();
     const badge = document.getElementById('rowMaxBadge');
-    if (isNaN(val)) return;
+
     if (val > maxRows) {
         val = maxRows;
         el.value = maxRows;
@@ -1395,10 +1498,28 @@ function validateAndSetRowCount(el) {
             }, 2500);
         }
     } else if (val < 1) {
-        val = 1;
-        el.value = 1;
+        return;
     }
     autoUpdateTableFromInputs();
+}
+
+function handleRowCountBlur(el) {
+    if (!el) return;
+    const rawVal = el.value.toString().trim();
+    let val = parseInt(rawVal, 10);
+    const maxRows = getMaxAllowedRows();
+    if (rawVal === '' || isNaN(val) || val < 1) {
+        val = currentRows.length || 8;
+        el.value = Math.min(val, maxRows);
+    } else if (val > maxRows) {
+        val = maxRows;
+        el.value = maxRows;
+    }
+    autoUpdateTableFromInputs();
+}
+
+function validateAndSetRowCount(el) {
+    handleRowCountInput(el);
 }
 
 function adjustColWidthStep(colIdx, step) {
@@ -1435,10 +1556,31 @@ function applyColPreset(preset) {
     renderInteractiveTableUI();
 }
 
+function toggleSuratTugasState(enabled) {
+    const hiddenInp = document.getElementById('inHasSuratTugas');
+    const labelSpan = document.getElementById('suratTugasLabelText');
+    if (hiddenInp) {
+        hiddenInp.value = enabled ? '1' : '0';
+    }
+    if (labelSpan) {
+        labelSpan.innerHTML = 'Surat Tugas: ' + (enabled ? '<span style="color: #7E22CE;">Aktif</span>' : '<span style="color: #64748B;">Nonaktif</span>');
+    }
+}
+
 function toggleDetailAcaraState(enabled) {
     const cardBox = document.getElementById('detailAcaraCardBox');
     const headerBox = document.getElementById('detailAcaraHeaderBox');
     const area = document.getElementById('detailAcaraFieldsArea');
+    const hiddenInp = document.getElementById('inIsDetailAcaraHidden');
+    const previewBlock = document.getElementById('pvPDetailAcaraBlock');
+
+    if (hiddenInp) {
+        hiddenInp.value = enabled ? '1' : '0';
+    }
+
+    if (previewBlock) {
+        previewBlock.style.display = enabled ? 'table' : 'none';
+    }
 
     if (enabled) {
         if (cardBox) {
@@ -1461,6 +1603,61 @@ function toggleDetailAcaraState(enabled) {
     updateRowLimitUI();
 }
 
+function toggleTglHuntingState(enabled) {
+    const boxHunting = document.getElementById('boxTglHunting');
+    const inp = document.getElementById('inTglHuntingP');
+    const boxPaket = document.getElementById('boxPaket');
+    
+    const rowHunting = document.getElementById('pvPRowTglHunting');
+    const lblPaketProd = document.getElementById('pvPTdPaketLbl1');
+    const colonPaketProd = document.getElementById('pvPTdPaketColon1');
+    const valPaketProd = document.getElementById('pvPTdPaketVal1');
+    const empty1Prod = document.getElementById('pvPTdEmpty1');
+    const empty2Prod = document.getElementById('pvPTdEmpty2');
+    const empty3Prod = document.getElementById('pvPTdEmpty3');
+
+    if (enabled) {
+        if (boxHunting) {
+            boxHunting.style.display = 'block';
+            boxHunting.style.gridColumn = '1';
+            boxHunting.style.gridRow = '2';
+        }
+        if (boxPaket) {
+            boxPaket.style.gridColumn = '2';
+            boxPaket.style.gridRow = '2';
+        }
+        if (inp) inp.disabled = false;
+
+        if (lblPaketProd) lblPaketProd.style.display = 'none';
+        if (colonPaketProd) colonPaketProd.style.display = 'none';
+        if (valPaketProd) valPaketProd.style.display = 'none';
+        if (empty1Prod) empty1Prod.style.display = 'table-cell';
+        if (empty2Prod) empty2Prod.style.display = 'table-cell';
+        if (empty3Prod) empty3Prod.style.display = 'table-cell';
+        if (rowHunting) rowHunting.style.display = 'table-row';
+    } else {
+        if (boxHunting) {
+            boxHunting.style.display = 'none';
+        }
+        if (boxPaket) {
+            boxPaket.style.gridColumn = '2';
+            boxPaket.style.gridRow = '1';
+        }
+        if (inp) inp.disabled = true;
+
+        if (lblPaketProd) lblPaketProd.style.display = 'table-cell';
+        if (colonPaketProd) colonPaketProd.style.display = 'table-cell';
+        if (valPaketProd) valPaketProd.style.display = 'table-cell';
+        if (empty1Prod) empty1Prod.style.display = 'none';
+        if (empty2Prod) empty2Prod.style.display = 'none';
+        if (empty3Prod) empty3Prod.style.display = 'none';
+        if (rowHunting) rowHunting.style.display = 'none';
+    }
+    if (typeof openReviewModal === 'function') {
+        openReviewModal(false);
+    }
+}
+
 function toggleTableState(enabled) {
     isTableEnabled = enabled;
     const cardBox = document.getElementById('tableCardBox');
@@ -1468,6 +1665,7 @@ function toggleTableState(enabled) {
     const inlineConfig = document.getElementById('inlineTableConfig');
     const area = document.getElementById('customTableRenderArea');
     const penutupBlock = document.getElementById('penutupInputBlock');
+    const inPenutup = document.getElementById('inPenutupP');
 
     if (enabled) {
         if (cardBox) {
@@ -1479,6 +1677,7 @@ function toggleTableState(enabled) {
         if (inlineConfig) inlineConfig.style.display = 'inline-flex';
         if (area) area.style.display = 'block';
         if (penutupBlock) penutupBlock.style.display = 'block';
+        if (inPenutup) inPenutup.required = true;
         autoUpdateTableFromInputs();
     } else {
         if (cardBox) {
@@ -1490,6 +1689,7 @@ function toggleTableState(enabled) {
         if (inlineConfig) inlineConfig.style.display = 'none';
         if (area) area.style.display = 'none';
         if (penutupBlock) penutupBlock.style.display = 'none';
+        if (inPenutup) inPenutup.required = false;
         clearTableHiddenInputs();
     }
 }
@@ -1508,30 +1708,35 @@ function autoUpdateTableFromInputs() {
     let rowInp = document.getElementById('inRowCount');
     const maxRows = getMaxAllowedRows();
 
+    // Jika salah satu input sedang kosong (user sedang menghapus untuk mengetik angka baru), jangan ubah tampilan table dulu
+    if (colInp && colInp.value.toString().trim() === '') return;
+    if (rowInp && rowInp.value.toString().trim() === '') return;
+
     let numCols = parseInt(colInp ? colInp.value : 6, 10);
     let numRows = parseInt(rowInp ? rowInp.value : maxRows, 10);
 
-    if (isNaN(numCols) || numCols < 1) numCols = 1;
-    if (numCols > 10) numCols = 10;
-    if (colInp && parseInt(colInp.value, 10) !== numCols) colInp.value = numCols;
+    if (isNaN(numCols) || numCols < 1) return;
+    if (isNaN(numRows) || numRows < 1) return;
 
-    if (isNaN(numRows) || numRows < 1) numRows = 1;
-    if (numRows > maxRows) {
-        numRows = maxRows;
-        if (rowInp) rowInp.value = maxRows;
-    }
+    if (numCols > 10) numCols = 10;
+    if (numRows > maxRows) numRows = maxRows;
 
     const defaultHead = ['NO', 'NAMA', 'PROFESI', 'NO', 'NAMA', 'PROFESI', 'KOLOM 7', 'KOLOM 8', 'KOLOM 9', 'KOLOM 10'];
     
     let newHeaders = [];
     for (let c = 0; c < numCols; c++) {
-        if (currentHeaders[c] !== undefined && currentHeaders[c] !== '') {
+        if (typeof masterHeaderData !== 'undefined' && masterHeaderData && masterHeaderData[c] !== undefined && masterHeaderData[c] !== '') {
+            newHeaders.push(masterHeaderData[c]);
+        } else if (currentHeaders[c] !== undefined && currentHeaders[c] !== '') {
             newHeaders.push(currentHeaders[c]);
         } else {
             newHeaders.push(defaultHead[c] || `KOLOM ${c + 1}`);
         }
     }
     currentHeaders = newHeaders;
+    if (typeof masterHeaderData !== 'undefined') {
+        masterHeaderData = [...currentHeaders];
+    }
     normalizeColWidths();
 
     const isDualNo = (numCols === 6 && (currentHeaders[0] || '').toUpperCase() === 'NO' && (currentHeaders[3] || '').toUpperCase() === 'NO');
@@ -1540,14 +1745,21 @@ function autoUpdateTableFromInputs() {
     for (let r = 0; r < numRows; r++) {
         let row = [];
         for (let c = 0; c < numCols; c++) {
-            if (currentRows[r] && currentRows[r][c] !== undefined) {
+            let existingVal = '';
+            if (typeof masterRowData !== 'undefined' && masterRowData && masterRowData[r] && masterRowData[r][c] !== undefined) {
+                existingVal = masterRowData[r][c];
+            } else if (currentRows[r] && currentRows[r][c] !== undefined) {
+                existingVal = currentRows[r][c];
+            }
+
+            if (existingVal !== '') {
                 // If it's right-side NO column and it's sequential numeric, sync with current numRows
-                if (isDualNo && c === 3 && (currentRows[r][c] === '' || /^\d+$/.test(currentRows[r][c].toString().trim()))) {
+                if (isDualNo && c === 3 && /^\d+$/.test(existingVal.toString().trim())) {
                     row.push((r + 1 + numRows).toString());
-                } else if (c === 0 && (currentRows[r][c] === '' || /^\d+$/.test(currentRows[r][c].toString().trim()))) {
+                } else if (c === 0 && /^\d+$/.test(existingVal.toString().trim())) {
                     row.push((r + 1).toString());
                 } else {
-                    row.push(currentRows[r][c]);
+                    row.push(existingVal);
                 }
             } else if (c === 0) {
                 row.push((r + 1).toString());
@@ -1558,6 +1770,10 @@ function autoUpdateTableFromInputs() {
             }
         }
         newRows.push(row);
+        if (typeof masterRowData !== 'undefined') {
+            if (!masterRowData[r]) masterRowData[r] = [];
+            masterRowData[r] = [...row];
+        }
     }
     currentRows = newRows;
 
@@ -1658,7 +1874,7 @@ function renderInteractiveTableUI() {
         const isNoCol = (h.trim().toUpperCase() === 'NO') || (colIdx === 0) || (currentHeaders.length === 6 && colIdx === 3);
         const wVal = currentColWidths[colIdx] ? `${currentColWidths[colIdx]}%` : (isNoCol ? '6%' : '');
         html += `
-            <th style="width: ${wVal}; text-align: ${isNoCol ? 'center' : 'left'};">
+            <th style="width: ${wVal}; text-align: ${isNoCol ? 'center' : 'left'}; font-weight: 600; font-family: 'Gotham Light', 'Gotham', sans-serif;">
                 <input type="text" value="${escapeHtml(h)}" oninput="updateHeaderCell(${colIdx}, this.value)" class="kru-header-input" style="text-align: ${isNoCol ? 'center' : 'left'};" title="Ubah Nama Kolom">
                 ${colIdx < currentHeaders.length - 1 ? `<div class="kru-col-resizer" data-col-index="${colIdx}" onmousedown="initColResize(event)" ontouchstart="initColResize(event)" title="Geser garis kolom untuk mengatur lebar / posisi garis"></div>` : ''}
             </th>
@@ -1685,16 +1901,26 @@ function renderInteractiveTableUI() {
 
     area.innerHTML = html;
     syncTableDataToHiddenInputs();
+    if (window.TvriAutocomplete && typeof window.TvriAutocomplete.reinit === 'function') {
+        window.TvriAutocomplete.reinit();
+    }
 }
 
 function updateHeaderCell(colIdx, val) {
     currentHeaders[colIdx] = val;
+    if (typeof masterHeaderData !== 'undefined') {
+        masterHeaderData[colIdx] = val;
+    }
     syncTableDataToHiddenInputs();
 }
 
 function updateBodyCell(rowIdx, colIdx, val) {
     if (currentRows[rowIdx]) {
         currentRows[rowIdx][colIdx] = val;
+    }
+    if (typeof masterRowData !== 'undefined') {
+        if (!masterRowData[rowIdx]) masterRowData[rowIdx] = [];
+        masterRowData[rowIdx][colIdx] = val;
     }
     syncTableDataToHiddenInputs();
 }
@@ -1739,6 +1965,11 @@ function formatDateIndo(dateStr) {
 }
 
 function openReviewModal(showModal = true) {
+    const colInp = document.getElementById('inColCount');
+    const rowInp = document.getElementById('inRowCount');
+    if (colInp && colInp.value.toString().trim() === '') handleColCountBlur(colInp);
+    if (rowInp && rowInp.value.toString().trim() === '') handleRowCountBlur(rowInp);
+
     // 1. Extract Permohonan Produksi Data
     const perihalP = document.getElementById('inHalP') ? document.getElementById('inHalP').value : '';
     const tglPVal = document.getElementById('inTanggalP') ? document.getElementById('inTanggalP').value : '';
@@ -1750,6 +1981,7 @@ function openReviewModal(showModal = true) {
     const lokasiSyuting = document.getElementById('inLokasiP') ? document.getElementById('inLokasiP').value : '';
     const namaProgram = document.getElementById('inJudulP') ? document.getElementById('inJudulP').value : '';
     const paket = document.getElementById('inPaketP') ? document.getElementById('inPaketP').value : '';
+    const tglProduksi = document.getElementById('inTglProduksiP') ? document.getElementById('inTglProduksiP').value : '';
     const tglHunting = document.getElementById('inTglHuntingP') ? document.getElementById('inTglHuntingP').value : '';
     const sumberBiaya = document.getElementById('inSumberBiayaP') ? document.getElementById('inSumberBiayaP').value : '';
     const tglSiaran = document.getElementById('inTglSiaranP') ? document.getElementById('inTglSiaranP').value : '';
@@ -1768,14 +2000,47 @@ function openReviewModal(showModal = true) {
     if (document.getElementById('pvPMataAcara')) document.getElementById('pvPMataAcara').textContent = mataAcara;
     if (document.getElementById('pvPLokasi')) document.getElementById('pvPLokasi').textContent = lokasiSyuting;
     if (document.getElementById('pvPJudul')) document.getElementById('pvPJudul').textContent = namaProgram;
-    if (document.getElementById('pvPPaket')) document.getElementById('pvPPaket').textContent = paket;
-    if (document.getElementById('pvPTglHunting')) document.getElementById('pvPTglHunting').textContent = tglHunting;
+    const valPaketText = paket || '-';
+    if (document.getElementById('pvPTdPaketVal1')) document.getElementById('pvPTdPaketVal1').textContent = valPaketText;
+    if (document.getElementById('pvPTdPaketVal2')) document.getElementById('pvPTdPaketVal2').textContent = valPaketText;
+    if (document.getElementById('pvPTglProduksi')) document.getElementById('pvPTglProduksi').textContent = tglProduksi;
+
+    const isTglHuntingActive = document.getElementById('tglHuntingToggleSwitch') ? document.getElementById('tglHuntingToggleSwitch').checked : false;
+    const pvRowHunting = document.getElementById('pvPRowTglHunting');
+    const pvValHunting = document.getElementById('pvPTglHunting');
+    const lblPaketProd = document.getElementById('pvPTdPaketLbl1');
+    const colonPaketProd = document.getElementById('pvPTdPaketColon1');
+    const valPaketProd = document.getElementById('pvPTdPaketVal1');
+    const empty1Prod = document.getElementById('pvPTdEmpty1');
+    const empty2Prod = document.getElementById('pvPTdEmpty2');
+    const empty3Prod = document.getElementById('pvPTdEmpty3');
+
+    if (pvRowHunting) {
+        if (isTglHuntingActive) {
+            pvRowHunting.style.display = 'table-row';
+            if (pvValHunting) pvValHunting.textContent = tglHunting || '-';
+            if (lblPaketProd) lblPaketProd.style.display = 'none';
+            if (colonPaketProd) colonPaketProd.style.display = 'none';
+            if (valPaketProd) valPaketProd.style.display = 'none';
+            if (empty1Prod) empty1Prod.style.display = 'table-cell';
+            if (empty2Prod) empty2Prod.style.display = 'table-cell';
+            if (empty3Prod) empty3Prod.style.display = 'table-cell';
+        } else {
+            pvRowHunting.style.display = 'none';
+            if (lblPaketProd) lblPaketProd.style.display = 'table-cell';
+            if (colonPaketProd) colonPaketProd.style.display = 'table-cell';
+            if (valPaketProd) valPaketProd.style.display = 'table-cell';
+            if (empty1Prod) empty1Prod.style.display = 'none';
+            if (empty2Prod) empty2Prod.style.display = 'none';
+            if (empty3Prod) empty3Prod.style.display = 'none';
+        }
+    }
     if (document.getElementById('pvPSumberBiaya')) document.getElementById('pvPSumberBiaya').textContent = sumberBiaya;
     if (document.getElementById('pvPTglSiaran')) document.getElementById('pvPTglSiaran').textContent = tglSiaran;
 
     // Toggle Detail Acara Block visibility in Preview
     const detailAcaraBlock = document.getElementById('pvPDetailAcaraBlock');
-    const isDetailAcaraActive = document.getElementById('detailAcaraToggleSwitch') ? document.getElementById('detailAcaraToggleSwitch').checked : true;
+    const isDetailAcaraActive = document.getElementById('detailAcaraToggleSwitch') ? document.getElementById('detailAcaraToggleSwitch').checked : false;
     if (detailAcaraBlock) {
         detailAcaraBlock.style.display = isDetailAcaraActive ? 'table' : 'none';
     }
@@ -1786,7 +2051,7 @@ function openReviewModal(showModal = true) {
 
     // Render Kru Table & Penutup for Permohonan Produksi
     const tableContainer = document.getElementById('pvPKruTableContainer');
-    const penutupVal = document.getElementById('inPenutupP') ? document.getElementById('inPenutupP').value : 'Demikian permohonan ini kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.';
+    const penutupVal = document.getElementById('inPenutupP') ? document.getElementById('inPenutupP').value : '';
     if (tableContainer) {
         if (isTableEnabled) {
             normalizeColWidths();
@@ -1807,8 +2072,8 @@ function openReviewModal(showModal = true) {
                 tLineHeight = '1.15';
             }
 
-            let tHtml = `<div style="margin-bottom: 12px; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                <table style="width: 100%; border-collapse: collapse; font-size: ${tFontSize}; line-height: ${tLineHeight}; text-align: left; color: #000; border: 1px solid #000; table-layout: fixed; box-sizing: border-box;" border="1">
+            let tHtml = `<div style="margin-bottom: 12px; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 1px; box-sizing: border-box;">
+                <table style="width: 100%; border-collapse: collapse; font-size: ${tFontSize}; line-height: ${tLineHeight}; text-align: left; color: #000; border: 1px solid #64748B; table-layout: fixed; box-sizing: border-box;">
                     <thead>
                         <tr style="background: #FFFFFF;">`;
             currentHeaders.forEach((h, idx) => {
@@ -1816,7 +2081,8 @@ function openReviewModal(showModal = true) {
                 const wVal = currentColWidths[idx] ? `${currentColWidths[idx]}%` : (isNoCol ? '6%' : '');
                 const wStyle = wVal ? `width: ${wVal};` : '';
                 const alignStyle = isNoCol ? 'text-align: center;' : 'text-align: left;';
-                tHtml += `<th style="padding: ${tPaddingTh}; border: 1px solid #000; font-weight: bold; font-family: Arial, sans-serif; ${wStyle} ${alignStyle} word-break: break-word; overflow-wrap: break-word; hyphens: auto; box-sizing: border-box;">${escapeHtml(h)}</th>`;
+                const borderLeftStyle = idx === 0 ? 'border-left: 1px solid #64748B !important;' : '';
+                tHtml += `<th style="padding: ${tPaddingTh}; border: 1px solid #64748B; ${borderLeftStyle} font-weight: 600; font-family: 'Gotham Light', 'Gotham', sans-serif; ${wStyle} ${alignStyle} word-break: break-word; overflow-wrap: break-word; hyphens: auto; box-sizing: border-box;">${escapeHtml(h)}</th>`;
             });
             tHtml += `</tr></thead><tbody>`;
             currentRows.forEach(row => {
@@ -1826,16 +2092,17 @@ function openReviewModal(showModal = true) {
                     const wVal = currentColWidths[idx] ? `${currentColWidths[idx]}%` : (isNoCol ? '6%' : '');
                     const wStyle = wVal ? `width: ${wVal};` : '';
                     const alignStyle = isNoCol ? 'text-align: center;' : 'text-align: left;';
-                    tHtml += `<td style="padding: ${tPaddingTd}; border: 1px solid #000; font-family: Arial, sans-serif; ${wStyle} ${alignStyle} word-break: break-word; overflow-wrap: break-word; box-sizing: border-box;">${escapeHtml(cell)}</td>`;
+                    const borderLeftStyle = idx === 0 ? 'border-left: 1px solid #64748B !important;' : '';
+                    tHtml += `<td style="padding: ${tPaddingTd}; border: 1px solid #64748B; ${borderLeftStyle} font-family: 'Gotham Light', 'Gotham', sans-serif; ${wStyle} ${alignStyle} word-break: break-word; overflow-wrap: break-word; box-sizing: border-box;">${escapeHtml(cell)}</td>`;
                 });
                 tHtml += `</tr>`;
             });
             tHtml += `</tbody></table></div>`;
-            tHtml += `<div style="margin-top: 10px; font-size: 11px; line-height: 1.35; color: #000000; font-family: Arial, sans-serif;">${escapeHtml(penutupVal)}</div>`;
+            tHtml += `<div style="margin-top: 10px; font-size: 10px; line-height: 1.35; color: #000000; font-family: 'Gotham Light', 'Gotham', sans-serif;">${escapeHtml(penutupVal)}</div>`;
             tableContainer.innerHTML = tHtml;
             tableContainer.style.display = 'block';
         } else {
-            tableContainer.innerHTML = `<div style="margin-top: 10px; font-size: 11px; line-height: 1.35; color: #000000; font-family: Arial, sans-serif;">${escapeHtml(penutupVal)}</div>`;
+            tableContainer.innerHTML = `<div style="margin-top: 10px; font-size: 10px; line-height: 1.35; color: #000000; font-family: 'Gotham Light', 'Gotham', sans-serif;">${escapeHtml(penutupVal)}</div>`;
             tableContainer.style.display = 'block';
         }
     }
@@ -1911,7 +2178,7 @@ function openReviewModal(showModal = true) {
                             </div>
                         </div>
 
-                        <div class="pdf-lampiran-card-preview" style="background: #FFFFFF; border: none; padding: 0 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #000000; position: relative; aspect-ratio: 210 / 297; min-height: 0; margin: 0 auto; box-sizing: border-box; border-radius: 4px; width: 100%; overflow: hidden;">
+                        <div class="pdf-lampiran-card-preview" style="background: #FFFFFF; border: none; padding: 0 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.06); font-family: 'Gotham Light', 'Gotham', sans-serif; color: #000000; position: relative; aspect-ratio: 210 / 297; min-height: 0; margin: 0 auto; box-sizing: border-box; border-radius: 4px; width: 100%; overflow: hidden;">
                             <canvas id="pdfCanvas_${pdfItem.id}_${p}" class="pdf-canvas-item" style="width: 100%; height: auto; object-fit: contain; ${canvasStyle} background: #FFFFFF; border: none; margin: 0; padding: 0;"></canvas>
                             <img id="pdfImg_${pdfItem.id}_${p}" class="pdf-img-item" src="${imgSrc}" style="width: 100%; height: auto; object-fit: contain; ${imgStyle} margin: 0 auto; border: none; padding: 0;">
                         </div>
@@ -2317,6 +2584,7 @@ function toggleKppBidangMenu(e) {
     var chevron = document.getElementById('kppBidangChevronIcon');
     var optionsList = document.getElementById('kppBidangOptionsList');
     var b1 = document.getElementById('bagian1Card');
+    var b2 = document.getElementById('bagian2Card');
     var cont = document.getElementById('kppBidangContainer');
     if (!menu || !trigger) return;
 
@@ -2325,7 +2593,8 @@ function toggleKppBidangMenu(e) {
         closeKppBidangMenu();
     } else {
         if (typeof closeSifatSuratMenu === 'function') closeSifatSuratMenu();
-        if (b1) b1.style.zIndex = '500';
+        if (b2) b2.style.zIndex = '500';
+        if (b1) b1.style.zIndex = '20';
         if (cont) cont.style.zIndex = '1000';
 
         var rect = trigger.getBoundingClientRect();
@@ -2356,6 +2625,7 @@ function closeKppBidangMenu() {
     var trigger = document.getElementById('kppBidangDropdownTrigger');
     var chevron = document.getElementById('kppBidangChevronIcon');
     var b1 = document.getElementById('bagian1Card');
+    var b2 = document.getElementById('bagian2Card');
     var cont = document.getElementById('kppBidangContainer');
     if (menu) menu.style.display = 'none';
     if (chevron) chevron.style.transform = 'rotate(0deg)';
@@ -2363,7 +2633,8 @@ function closeKppBidangMenu() {
         trigger.style.borderColor = '#E5E7EB';
         trigger.style.boxShadow = 'none';
     }
-    if (b1) b1.style.zIndex = '30';
+    if (b2) b2.style.zIndex = '10';
+    if (b1) b1.style.zIndex = '20';
     if (cont) cont.style.zIndex = '';
 }
 
@@ -2541,6 +2812,9 @@ function submitFormFromReview() {
         showPenandatanganWarningModal();
         return;
     }
+    if (window.TvriAutocomplete && typeof window.TvriAutocomplete.saveAll === 'function') {
+        window.TvriAutocomplete.saveAll();
+    }
     closeReviewModal();
     document.body.style.overflow = '';
     document.getElementById('formProduksi').submit();
@@ -2710,9 +2984,10 @@ function printReviewModal(modalId) {
             <title></title>
             <base href="<?= (defined('BASE_URL') ? BASE_URL : '') ?>/">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+            <link rel="stylesheet" href="<?= (defined('BASE_URL') ? BASE_URL : '') ?>/assets/css/gotham-font.css">
             <style>
                 @page { size: A4 portrait; margin: 0; }
-                html, body { font-family: Arial, sans-serif; background: #ffffff; color: #000000; margin: 0 !important; padding: 0 !important; width: 210mm !important; height: auto !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                html, body { font-family: 'Gotham Light', 'Gotham', sans-serif; background: #ffffff; color: #000000; margin: 0 !important; padding: 0 !important; width: 210mm !important; height: auto !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                 img { max-width: 100% !important; display: inline-block !important; visibility: visible !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                 .printable-a4-page { background: #FFFFFF !important; border: none !important; box-shadow: none !important; padding: 3cm !important; margin: 0 auto !important; width: 210mm !important; height: 297mm !important; max-height: 297mm !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; overflow: hidden !important; }
                 .printable-a4-page.printable-lampiran-page { padding: 0 !important; border: none !important; box-shadow: none !important; overflow: hidden !important; width: 210mm !important; height: 297mm !important; background: #ffffff !important; display: block !important; }
@@ -2773,10 +3048,9 @@ function updateLiveBarcodePreview(url) {
             linkPreview.innerText = trimmed;
             linkPreview.style.color = '#15803D';
         } else {
-            const defaultUrl = 'https://drive.google.com';
-            img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(defaultUrl);
-            statusText.innerHTML = '<i class="bi bi-info-circle-fill" style="font-size: 16px; color: #EAB308;"></i> SIAP GENERATE BARCODE';
-            linkPreview.innerText = 'Silakan paste / tempel URL Google Drive di atas';
+            img.src = '<?= BASE_URL ?>/assets/img/barcode_placeholder.png';
+            statusText.innerHTML = '<i class="bi bi-info-circle-fill" style="font-size: 16px; color: #64748B;"></i> BARCODE BELUM AKTIF';
+            linkPreview.innerText = 'Barcode aktif otomatis setelah surat terupload ke Google Drive';
             linkPreview.style.color = '#64748B';
         }
     }
@@ -2832,20 +3106,30 @@ function saveBarcodeFromModal() {
 function updateReviewBarcodePreview(url) {
     const pvBarcodeImg = document.getElementById('pvBarcodeImg');
     if (pvBarcodeImg) {
-        const targetUrl = url || 'https://drive.google.com';
-        pvBarcodeImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(targetUrl);
+        if (url && url !== 'https://drive.google.com' && url !== '#') {
+            pvBarcodeImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(url);
+        } else {
+            pvBarcodeImg.src = '<?= BASE_URL ?>/assets/img/barcode_placeholder.png';
+        }
     }
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+    const stToggle = document.getElementById('suratTugasToggleSwitch');
+    if (stToggle) {
+        toggleSuratTugasState(stToggle.checked);
+    }
     const detailToggle = document.getElementById('detailAcaraToggleSwitch');
     if (detailToggle) {
         toggleDetailAcaraState(detailToggle.checked);
     }
+    const tglToggle = document.getElementById('tglHuntingToggleSwitch');
+    if (tglToggle) {
+        toggleTglHuntingState(tglToggle.checked);
+    }
     const toggle = document.getElementById('tableToggleSwitch');
     if (toggle) {
-        toggle.checked = true;
-        toggleTableState(true);
+        toggleTableState(toggle.checked);
     }
 });
 
@@ -3104,6 +3388,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const formEl = document.getElementById('formProduksi');
     if (formEl) {
         formEl.addEventListener('submit', function(e) {
+            const colInp = document.getElementById('inColCount');
+            const rowInp = document.getElementById('inRowCount');
+            if (colInp && colInp.value.toString().trim() === '') handleColCountBlur(colInp);
+            if (rowInp && rowInp.value.toString().trim() === '') handleRowCountBlur(rowInp);
+
             const kppSelect = document.getElementById('inKppUserId');
             if (!kppSelect || !kppSelect.value) {
                 e.preventDefault();
@@ -3114,3 +3403,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script src="<?= BASE_URL ?>/assets/js/input-autocomplete-history.js"></script>
