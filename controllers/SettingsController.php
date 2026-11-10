@@ -59,9 +59,9 @@ class SettingsController extends Controller
 
     public function saveGdrive(): void
     {
-        $folderId = Security::sanitize($_POST['gdrive_folder_id'] ?? '1q43jnW7Tw0ghLY7rrx-OPI3aTQAronrB');
-        $ktuFolderId = Security::sanitize($_POST['gdrive_ktu_folder_id'] ?? '1m1SVmXboA73OFJKSK-BjfRtYXMdxlfm7');
-        $kepstaFolderId = Security::sanitize($_POST['gdrive_kepsta_folder_id'] ?? '1q43jnW7Tw0ghLY7rrx-OPI3aTQAronrB');
+        $folderId = GoogleDriveService::sanitizeFolderId($_POST['gdrive_folder_id'] ?? '1q43jnW7Tw0ghLY7rrx-OPI3aTQAronrB');
+        $ktuFolderId = GoogleDriveService::sanitizeFolderId($_POST['gdrive_ktu_folder_id'] ?? '1m1SVmXboA73OFJKSK-BjfRtYXMdxlfm7');
+        $kepstaFolderId = GoogleDriveService::sanitizeFolderId($_POST['gdrive_kepsta_folder_id'] ?? '1q43jnW7Tw0ghLY7rrx-OPI3aTQAronrB');
         $clientId = Security::sanitize($_POST['gdrive_client_id'] ?? '');
         $clientSecret = Security::sanitize($_POST['gdrive_client_secret'] ?? '');
         $refreshToken = trim($_POST['gdrive_refresh_token'] ?? '');

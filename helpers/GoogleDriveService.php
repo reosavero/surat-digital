@@ -77,6 +77,7 @@ class GoogleDriveService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Authorization: Bearer ' . $accessToken,
                 'Content-Type: application/pdf',
@@ -94,9 +95,23 @@ class GoogleDriveService
         }
     }
 
+    public static function sanitizeFolderId(?string $folderId): string
+    {
+        if (empty($folderId)) return '';
+        $folderId = trim($folderId);
+        if (preg_match('/folders\/([a-zA-Z0-9_-]+)/i', $folderId, $m)) {
+            return $m[1];
+        }
+        if (str_contains($folderId, '?')) {
+            $folderId = explode('?', $folderId)[0];
+        }
+        return trim($folderId);
+    }
+
     public static function uploadPdf(string $filePath, string $filename, string $suratKode, ?string $folderId = null): array
     {
-        $targetFolderId = !empty($folderId) ? $folderId : Setting::get('gdrive_ktu_folder_id', '1m1SVmXboA73OFJKSK-BjfRtYXMdxlfm7');
+        $rawFolderId = !empty($folderId) ? $folderId : Setting::get('gdrive_ktu_folder_id', '1m1SVmXboA73OFJKSK-BjfRtYXMdxlfm7');
+        $targetFolderId = self::sanitizeFolderId($rawFolderId);
         $accessToken = self::getEffectiveAccessToken();
 
         // Pastikan nama file yang terupload ke Google Drive tidak menampilkan kode surat
@@ -214,7 +229,34 @@ class GoogleDriveService
             }
             if (file_exists($absPath)) {
                 $targetFolder = ($s['status'] === 'completed') ? $kepstaFolderId : $ktuFolderId;
-                $res = self::uploadPdf($absPath, basename($absPath), $s['kode_surat'], $targetFolder);
+                $filename = basename($absPath);
+                if ($targetFolder === $ktuFolderId) {
+                    $sObj = $suratModel->getById((int)$s['id']);
+                    $halDinas = trim($sObj['perihal'] ?? '');
+                    if (!empty($halDinas)) {
+                        $halClean = preg_replace('/\.pdf$/i', '', $halDinas);
+                        $halClean = trim(preg_replace('/[\/\\:*?"<>|]/', ' ', $halClean));
+                        $halClean = preg_replace('/\s+/', ' ', $halClean);
+                        if (str_starts_with($halClean, '(') && str_ends_with($halClean, ')')) {
+                            $halClean = trim(substr($halClean, 1, -1));
+                        }
+                        if (empty($halClean)) {
+                            $halClean = 'Nota Dinas';
+                        }
+                        $sMeta = json_decode($sObj['meta_data'] ?? '[]', true);
+                        $nomorSurat = trim($sObj['nomor_surat'] ?? $sMeta['nomor_surat'] ?? $sMeta['nomor_surat_disposisi'] ?? '');
+                        $isTuSigned = in_array($sObj['status'], ['tu_signed', 'sekre_approved', 'completed', 'disposisi_completed']) || !empty($sObj['tu_signed_at']);
+                        $signSuffix = $isTuSigned ? ' sign' : '';
+                        if (!empty($nomorSurat)) {
+                            $filename = $nomorSurat . ' ' . $halClean . $signSuffix . '.pdf';
+                        } elseif (!preg_match('/^surat\b/i', $halClean)) {
+                            $filename = 'Surat ' . $halClean . $signSuffix . '.pdf';
+                        } else {
+                            $filename = $halClean . $signSuffix . '.pdf';
+                        }
+                    }
+                }
+                $res = self::uploadPdf($absPath, $filename, $s['kode_surat'], $targetFolder);
                 if (!empty($res['success']) && !str_starts_with($res['file_id'] ?? '', 'gdrive_')) {
                     $suratModel->updateSurat($s['id'], [
                         'gdrive_file_id' => $res['file_id'],
